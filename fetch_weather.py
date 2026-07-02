@@ -35,6 +35,7 @@ STATION_ID = "KMDPOOLE58"
 FIPS = "24031"  # Montgomery County, MD
 TZ = ZoneInfo("America/New_York")
 OUTPUT_FILE = "weather_summary.json"
+HISTORY_FILE = "weather_history.csv"
 USER_AGENT = "RDBF-weather-preprocessor (github.com/rdbfarm)"
 
 WU_API_KEY = os.environ.get("WU_API_KEY", "").strip()
@@ -325,6 +326,73 @@ def get_drought(previous):
     return out
 
 
+# ── Daily archive ────────────────────────────────────────────────────────────
+HISTORY_COLUMNS = [
+    "date", "temp_f", "humidity_pct", "precip_today_in",
+    "soil_0cm_f", "soil_6cm_f", "soil_trend_7day",
+    "precip_type_today", "nws_active_alerts",
+    "uv_peak", "drought_week_ending",
+    "drought_d0_pct", "drought_d1_pct", "drought_d2_pct",
+    "drought_d3_pct", "drought_d4_pct",
+]
+
+
+def archive_history(summary):
+    """Append one row per DAY to weather_history.csv. Same-day re-runs overwrite
+    that day's row so the archive stays one-row-per-day and never duplicates.
+    Text-only and tiny (~0.7 MB per year); safe to keep in Git forever."""
+    today = summary["generated_et"][:10]  # YYYY-MM-DD
+    cc = summary.get("current_conditions", {})
+    soil = summary.get("soil_temperature", {})
+    precip = summary.get("precipitation", {})
+    nws = summary.get("nws_alerts", {})
+    uv = summary.get("uv_index", {})
+    dr = summary.get("drought_status", {})
+
+    row = {
+        "date": today,
+        "temp_f": cc.get("temp_f"),
+        "humidity_pct": cc.get("humidity_pct"),
+        "precip_today_in": cc.get("precip_today_in"),
+        "soil_0cm_f": soil.get("surface_0cm_f"),
+        "soil_6cm_f": soil.get("depth_6cm_f"),
+        "soil_trend_7day": soil.get("trend_7day"),
+        "precip_type_today": precip.get("type_today"),
+        "nws_active_alerts": nws.get("active_count"),
+        "uv_peak": uv.get("peak_uvi"),
+        "drought_week_ending": dr.get("week_ending"),
+        "drought_d0_pct": dr.get("d0_pct"),
+        "drought_d1_pct": dr.get("d1_pct"),
+        "drought_d2_pct": dr.get("d2_pct"),
+        "drought_d3_pct": dr.get("d3_pct"),
+        "drought_d4_pct": dr.get("d4_pct"),
+    }
+
+    # Read existing rows (if any), keyed by date.
+    existing = {}
+    try:
+        with open(HISTORY_FILE, newline="") as f:
+            for r in csv.DictReader(f):
+                existing[r.get("date")] = r
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        errors.append(f"weather_history.csv read error: {type(e).__name__}: {e}")
+
+    existing[today] = {k: ("" if row[k] is None else row[k]) for k in HISTORY_COLUMNS}
+
+    # Write back sorted by date (chronological).
+    try:
+        with open(HISTORY_FILE, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=HISTORY_COLUMNS)
+            w.writeheader()
+            for date in sorted(existing):
+                w.writerow(existing[date])
+        print(f"Archived {today} to {HISTORY_FILE} ({len(existing)} days total)")
+    except Exception as e:
+        errors.append(f"weather_history.csv write error: {type(e).__name__}: {e}")
+
+
 # ── Assemble ─────────────────────────────────────────────────────────────────
 def main():
     now_local = datetime.now(TZ)
@@ -415,6 +483,10 @@ def main():
         "uv_index": uv,
         "drought_status": drought,
     }
+
+    # Archive today's values to the permanent history BEFORE overwriting the
+    # snapshot, so nothing is ever lost.
+    archive_history(summary)
 
     with open(OUTPUT_FILE, "w") as f:
         json.dump(summary, f, indent=2)
