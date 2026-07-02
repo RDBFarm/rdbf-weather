@@ -1,5 +1,5 @@
 {
-  "generated_et": "2026-07-02T16:41:37-04:00",
+  "generated_et": "2026-07-02T17:09:05-04:00",
   "run_type": "scheduled",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
@@ -7,19 +7,19 @@
   },
   "current_conditions": {
     "source": "KMDPOOLE58",
-    "temp_f": 99,
-    "humidity_pct": 47,
+    "temp_f": 98,
+    "humidity_pct": 49,
     "wind_mph": 6,
-    "wind_dir_deg": 230,
+    "wind_dir_deg": 194,
     "precip_today_in": 0.0,
     "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-07-02 16:41:30"
+    "obs_time_local": "2026-07-02 17:09:01"
   },
   "soil_temperature": {
     "source": "Open-Meteo",
-    "surface_0cm_f": 104.0,
-    "depth_6cm_f": 93.8,
-    "reading_time_et": "2026-07-02 4:00 PM",
+    "surface_0cm_f": 101.7,
+    "depth_6cm_f": 94.0,
+    "reading_time_et": "2026-07-02 5:00 PM",
     "planting_threshold_f": 70,
     "threshold_reached_6cm": true,
     "trend_7day": "warming"
@@ -155,8 +155,8 @@
       },
       {
         "date": "2026-07-05",
-        "weathercode": 95,
-        "precip_type": "thunderstorm",
+        "weathercode": 81,
+        "precip_type": "rain",
         "precip_sum_mm": 8.8,
         "rain_sum_mm": 0.3,
         "snowfall_sum_cm": 0.0,
@@ -164,7 +164,7 @@
       },
       {
         "date": "2026-07-06",
-        "weathercode": 95,
+        "weathercode": 96,
         "precip_type": "thunderstorm",
         "precip_sum_mm": 29.9,
         "rain_sum_mm": 23.6,
@@ -229,23 +229,24 @@
   "uv_index": {
     "source": "currentuvindex.com",
     "timezone": "America/New_York",
-    "current_uvi": 5.6,
-    "above_3_time_et": "5:00 PM",
-    "below_3_time_et": "5:00 PM",
-    "peak_uvi": 3.4,
-    "peak_time_et": "5:00 PM",
-    "sanity_check_passed": true
+    "current_uvi": 3.4,
+    "above_3_time_et": null,
+    "below_3_time_et": null,
+    "peak_uvi": 1.6,
+    "peak_time_et": "6:00 PM",
+    "sanity_check_passed": null
   },
   "drought_status": {
     "source": "US Drought Monitor",
     "county": "Montgomery County MD",
     "fips": "24031",
-    "week_ending": null,
-    "d0_pct": null,
-    "d1_pct": null,
-    "d2_pct": null,
-    "d3_pct": null,
-    "d4_pct": null,
+    "week_ending": "2026-07-06",
+    "d0_pct": 100.0,
+    "d1_pct": 100.0,
+    "d2_pct": 2.87,
+    "d3_pct": 0.0,
+    "d4_pct": 0.0,
+    "status_summary": "3% of county in Severe (D2) or worse.",
     "carried_forward": false
   }
 }
