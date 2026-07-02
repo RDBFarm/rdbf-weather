@@ -19,6 +19,8 @@ Data-integrity rules (non-negotiable):
     Fog (45-48): NOT precipitation.
 """
 
+import csv
+import io
 import json
 import os
 import sys
@@ -46,6 +48,17 @@ def fetch_json(url, headers=None, timeout=30):
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode("utf-8"))
+    except Exception as e:
+        errors.append(f"{url.split('?')[0]} -> {type(e).__name__}: {e}")
+        return None
+
+
+def fetch_text(url, headers=None, timeout=30):
+    """GET a URL, return raw text or None (never raises). For CSV endpoints."""
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, **(headers or {})})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.read().decode("utf-8")
     except Exception as e:
         errors.append(f"{url.split('?')[0]} -> {type(e).__name__}: {e}")
         return None
@@ -247,28 +260,66 @@ def get_drought(previous):
 
     out = {"source": "US Drought Monitor", "county": "Montgomery County MD",
            "fips": FIPS, "week_ending": None, "d0_pct": None, "d1_pct": None,
-           "d2_pct": None, "d3_pct": None, "d4_pct": None, "carried_forward": False}
+           "d2_pct": None, "d3_pct": None, "d4_pct": None,
+           "status_summary": None, "carried_forward": False}
 
-    end = today.strftime("%m/%d/%Y")
-    start = (today - timedelta(days=14)).strftime("%m/%d/%Y")
+    # This API is finicky about date format: use NO leading zeros (7/2/2026,
+    # not 07/02/2026) to match the format that returns data. Window is 21 days
+    # so there are always 2-3 weekly records to fall back on — important because
+    # the scheduled Thursday-morning run happens before the new map is released
+    # (USDM publishes Thursdays ~noon Central); the evening run picks up the fresh one.
+    start_dt = today - timedelta(days=21)
+    end = f"{today.month}/{today.day}/{today.year}"
+    start = f"{start_dt.month}/{start_dt.day}/{start_dt.year}"
     url = ("https://usdmdataservices.unl.edu/api/CountyStatistics/"
            f"GetDroughtSeverityStatisticsByAreaPercent"
            f"?aoi={FIPS}&startdate={start}&enddate={end}&statisticsType=1")
-    data = fetch_json(url, headers={"Accept": "application/json"})
-    if not data:
+
+    # Endpoint returns CSV by default (proven-reliable format). Parse it directly.
+    text = fetch_text(url)
+    if not text:
+        errors.append("Drought Monitor: no response from API")
         if prev_block:
             prev_block["carried_forward"] = True
             return prev_block
         return out
+
+    def _pct(v):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+
     try:
-        latest = data[-1] if isinstance(data, list) and data else None
-        if latest:
-            out["week_ending"] = latest.get("ValidEnd") or latest.get("MapDate")
-            out["d0_pct"] = latest.get("D0")
-            out["d1_pct"] = latest.get("D1")
-            out["d2_pct"] = latest.get("D2")
-            out["d3_pct"] = latest.get("D3")
-            out["d4_pct"] = latest.get("D4")
+        rows = [r for r in csv.DictReader(io.StringIO(text)) if r.get("ValidEnd")]
+        if not rows:
+            errors.append("Drought Monitor returned no data rows for the query window "
+                          f"({start}–{end}) — check date range/params")
+            if prev_block:
+                prev_block["carried_forward"] = True
+                return prev_block
+            return out
+
+        # Pick the most recent week by ValidEnd (ISO strings sort correctly).
+        latest = max(rows, key=lambda r: r.get("ValidEnd", ""))
+        out["week_ending"] = latest.get("ValidEnd") or latest.get("MapDate")
+        out["d0_pct"] = _pct(latest.get("D0"))
+        out["d1_pct"] = _pct(latest.get("D1"))
+        out["d2_pct"] = _pct(latest.get("D2"))
+        out["d3_pct"] = _pct(latest.get("D3"))
+        out["d4_pct"] = _pct(latest.get("D4"))
+
+        # Plain-language summary. Percentages are cumulative: D1 = % of county
+        # in Moderate drought OR WORSE, etc. Highest active category wins.
+        cats = [("Exceptional (D4)", out["d4_pct"]), ("Extreme (D3)", out["d3_pct"]),
+                ("Severe (D2)", out["d2_pct"]), ("Moderate (D1)", out["d1_pct"]),
+                ("Abnormally Dry (D0)", out["d0_pct"])]
+        worst = next(((name, pct) for name, pct in cats if pct and pct > 0), None)
+        if worst is None:
+            out["status_summary"] = "No drought or abnormal dryness."
+        else:
+            name, pct = worst
+            out["status_summary"] = f"{pct:.0f}% of county in {name} or worse."
     except Exception as e:
         errors.append(f"Drought Monitor parse error: {type(e).__name__}: {e}")
     return out
