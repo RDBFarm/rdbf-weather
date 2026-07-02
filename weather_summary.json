@@ -1,0 +1,251 @@
+{
+  "generated_et": "2026-07-02T16:41:37-04:00",
+  "run_type": "scheduled",
+  "data_integrity": {
+    "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
+    "errors_this_run": []
+  },
+  "current_conditions": {
+    "source": "KMDPOOLE58",
+    "temp_f": 99,
+    "humidity_pct": 47,
+    "wind_mph": 6,
+    "wind_dir_deg": 230,
+    "precip_today_in": 0.0,
+    "precip_rate_in_hr": 0.0,
+    "obs_time_local": "2026-07-02 16:41:30"
+  },
+  "soil_temperature": {
+    "source": "Open-Meteo",
+    "surface_0cm_f": 104.0,
+    "depth_6cm_f": 93.8,
+    "reading_time_et": "2026-07-02 4:00 PM",
+    "planting_threshold_f": 70,
+    "threshold_reached_6cm": true,
+    "trend_7day": "warming"
+  },
+  "precipitation": {
+    "type_today": "none",
+    "rule": "rain -> Weather Underground actuals; snow/freezing rain -> Open-Meteo ESTIMATE requiring verbal confirmation; fog is not precip",
+    "today_actual_in": 0.0,
+    "today_estimate_note": null,
+    "past_7day_station_actuals": [
+      {
+        "date": "2026-06-26",
+        "precip_in": 0.0
+      },
+      {
+        "date": "2026-06-27",
+        "precip_in": 0.02
+      },
+      {
+        "date": "2026-06-28",
+        "precip_in": 0.26
+      },
+      {
+        "date": "2026-06-29",
+        "precip_in": 0.0
+      },
+      {
+        "date": "2026-06-30",
+        "precip_in": 0.0
+      },
+      {
+        "date": "2026-07-01",
+        "precip_in": 0.0
+      },
+      {
+        "date": "2026-07-02",
+        "precip_in": 0.0
+      }
+    ]
+  },
+  "forecast_daily": {
+    "source": "Open-Meteo",
+    "days": [
+      {
+        "date": "2026-06-25",
+        "weathercode": 3,
+        "precip_type": "none",
+        "precip_sum_mm": 0.0,
+        "rain_sum_mm": 0.0,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 2
+      },
+      {
+        "date": "2026-06-26",
+        "weathercode": 3,
+        "precip_type": "none",
+        "precip_sum_mm": 0.0,
+        "rain_sum_mm": 0.0,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 32
+      },
+      {
+        "date": "2026-06-27",
+        "weathercode": 51,
+        "precip_type": "rain",
+        "precip_sum_mm": 0.4,
+        "rain_sum_mm": 0.4,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 52
+      },
+      {
+        "date": "2026-06-28",
+        "weathercode": 61,
+        "precip_type": "rain",
+        "precip_sum_mm": 3.3,
+        "rain_sum_mm": 3.3,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 27
+      },
+      {
+        "date": "2026-06-29",
+        "weathercode": 45,
+        "precip_type": "fog_not_precip",
+        "precip_sum_mm": 0.0,
+        "rain_sum_mm": 0.0,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 7
+      },
+      {
+        "date": "2026-06-30",
+        "weathercode": 2,
+        "precip_type": "none",
+        "precip_sum_mm": 0.0,
+        "rain_sum_mm": 0.0,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 1
+      },
+      {
+        "date": "2026-07-01",
+        "weathercode": 1,
+        "precip_type": "none",
+        "precip_sum_mm": 0.0,
+        "rain_sum_mm": 0.0,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 6
+      },
+      {
+        "date": "2026-07-02",
+        "weathercode": 1,
+        "precip_type": "none",
+        "precip_sum_mm": 0.0,
+        "rain_sum_mm": 0.0,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 1
+      },
+      {
+        "date": "2026-07-03",
+        "weathercode": 0,
+        "precip_type": "none",
+        "precip_sum_mm": 0.0,
+        "rain_sum_mm": 0.0,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 7
+      },
+      {
+        "date": "2026-07-04",
+        "weathercode": 80,
+        "precip_type": "rain",
+        "precip_sum_mm": 4.8,
+        "rain_sum_mm": 0.0,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 57
+      },
+      {
+        "date": "2026-07-05",
+        "weathercode": 95,
+        "precip_type": "thunderstorm",
+        "precip_sum_mm": 8.8,
+        "rain_sum_mm": 0.3,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 75
+      },
+      {
+        "date": "2026-07-06",
+        "weathercode": 95,
+        "precip_type": "thunderstorm",
+        "precip_sum_mm": 29.9,
+        "rain_sum_mm": 23.6,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 70
+      },
+      {
+        "date": "2026-07-07",
+        "weathercode": 51,
+        "precip_type": "rain",
+        "precip_sum_mm": 1.1,
+        "rain_sum_mm": 0.8,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 58
+      },
+      {
+        "date": "2026-07-08",
+        "weathercode": 3,
+        "precip_type": "none",
+        "precip_sum_mm": 0.0,
+        "rain_sum_mm": 0.0,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 22
+      }
+    ]
+  },
+  "nws_alerts": {
+    "source": "api.weather.gov",
+    "active_count": 4,
+    "alerts": [
+      {
+        "event": "Test Message",
+        "severity": "Unknown",
+        "headline": null,
+        "onset": null,
+        "ends": null
+      },
+      {
+        "event": "Extreme Heat Warning",
+        "severity": "Severe",
+        "headline": "Extreme Heat Warning issued July 2 at 1:32PM EDT until July 3 at 8:00PM EDT by NWS Baltimore MD/Washington DC",
+        "onset": "2026-07-03T10:00:00-04:00",
+        "ends": "2026-07-03T20:00:00-04:00"
+      },
+      {
+        "event": "Extreme Heat Warning",
+        "severity": "Severe",
+        "headline": "Extreme Heat Warning issued July 2 at 1:32PM EDT until July 2 at 8:00PM EDT by NWS Baltimore MD/Washington DC",
+        "onset": "2026-07-02T13:32:00-04:00",
+        "ends": "2026-07-02T20:00:00-04:00"
+      },
+      {
+        "event": "Extreme Heat Warning",
+        "severity": "Severe",
+        "headline": "Extreme Heat Warning issued July 2 at 1:32PM EDT until July 4 at 8:00PM EDT by NWS Baltimore MD/Washington DC",
+        "onset": "2026-07-04T10:00:00-04:00",
+        "ends": "2026-07-04T20:00:00-04:00"
+      }
+    ],
+    "frost_or_freeze_active": false
+  },
+  "uv_index": {
+    "source": "currentuvindex.com",
+    "timezone": "America/New_York",
+    "current_uvi": 5.6,
+    "above_3_time_et": "5:00 PM",
+    "below_3_time_et": "5:00 PM",
+    "peak_uvi": 3.4,
+    "peak_time_et": "5:00 PM",
+    "sanity_check_passed": true
+  },
+  "drought_status": {
+    "source": "US Drought Monitor",
+    "county": "Montgomery County MD",
+    "fips": "24031",
+    "week_ending": null,
+    "d0_pct": null,
+    "d1_pct": null,
+    "d2_pct": null,
+    "d3_pct": null,
+    "d4_pct": null,
+    "carried_forward": false
+  }
+}
