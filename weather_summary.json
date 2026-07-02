@@ -1,5 +1,5 @@
 {
-  "generated_et": "2026-07-02T17:09:05-04:00",
+  "generated_et": "2026-07-02T17:26:29-04:00",
   "run_type": "scheduled",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
@@ -8,12 +8,12 @@
   "current_conditions": {
     "source": "KMDPOOLE58",
     "temp_f": 98,
-    "humidity_pct": 49,
+    "humidity_pct": 47,
     "wind_mph": 6,
-    "wind_dir_deg": 194,
+    "wind_dir_deg": 211,
     "precip_today_in": 0.0,
     "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-07-02 17:09:01"
+    "obs_time_local": "2026-07-02 17:26:21"
   },
   "soil_temperature": {
     "source": "Open-Meteo",
@@ -137,7 +137,7 @@
       },
       {
         "date": "2026-07-03",
-        "weathercode": 0,
+        "weathercode": 1,
         "precip_type": "none",
         "precip_sum_mm": 0.0,
         "rain_sum_mm": 0.0,
@@ -164,7 +164,7 @@
       },
       {
         "date": "2026-07-06",
-        "weathercode": 96,
+        "weathercode": 99,
         "precip_type": "thunderstorm",
         "precip_sum_mm": 29.9,
         "rain_sum_mm": 23.6,
@@ -205,23 +205,23 @@
       {
         "event": "Extreme Heat Warning",
         "severity": "Severe",
-        "headline": "Extreme Heat Warning issued July 2 at 1:32PM EDT until July 3 at 8:00PM EDT by NWS Baltimore MD/Washington DC",
+        "headline": "Extreme Heat Warning issued July 2 at 5:20PM EDT until July 4 at 8:00PM EDT by NWS Baltimore MD/Washington DC",
+        "onset": "2026-07-04T10:00:00-04:00",
+        "ends": "2026-07-04T20:00:00-04:00"
+      },
+      {
+        "event": "Extreme Heat Warning",
+        "severity": "Severe",
+        "headline": "Extreme Heat Warning issued July 2 at 5:20PM EDT until July 3 at 8:00PM EDT by NWS Baltimore MD/Washington DC",
         "onset": "2026-07-03T10:00:00-04:00",
         "ends": "2026-07-03T20:00:00-04:00"
       },
       {
         "event": "Extreme Heat Warning",
         "severity": "Severe",
-        "headline": "Extreme Heat Warning issued July 2 at 1:32PM EDT until July 2 at 8:00PM EDT by NWS Baltimore MD/Washington DC",
-        "onset": "2026-07-02T13:32:00-04:00",
+        "headline": "Extreme Heat Warning issued July 2 at 5:20PM EDT until July 2 at 8:00PM EDT by NWS Baltimore MD/Washington DC",
+        "onset": "2026-07-02T17:20:00-04:00",
         "ends": "2026-07-02T20:00:00-04:00"
-      },
-      {
-        "event": "Extreme Heat Warning",
-        "severity": "Severe",
-        "headline": "Extreme Heat Warning issued July 2 at 1:32PM EDT until July 4 at 8:00PM EDT by NWS Baltimore MD/Washington DC",
-        "onset": "2026-07-04T10:00:00-04:00",
-        "ends": "2026-07-04T20:00:00-04:00"
       }
     ],
     "frost_or_freeze_active": false
