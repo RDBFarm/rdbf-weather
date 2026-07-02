@@ -38,7 +38,7 @@ jobs:
         run: |
           git config user.name "rdbf-weather-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add weather_summary.json
+          git add weather_summary.json weather_history.csv
           # Nothing changed? Exit cleanly.
           if git diff --cached --quiet; then
             echo "No weather changes to commit."
