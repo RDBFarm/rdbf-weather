@@ -1,5 +1,5 @@
 {
-  "generated_et": "2026-07-05T11:17:50-04:00",
+  "generated_et": "2026-07-05T11:28:04-04:00",
   "run_type": "scheduled",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
@@ -7,13 +7,29 @@
   },
   "current_conditions": {
     "source": "KMDPOOLE58",
-    "temp_f": 88,
-    "humidity_pct": 57,
-    "wind_mph": 3,
-    "wind_dir_deg": 76,
+    "temp_f": 87,
+    "humidity_pct": 56,
+    "wind_mph": 6,
+    "wind_dir_deg": 194,
     "precip_today_in": 0.0,
     "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-07-05 11:17:44"
+    "obs_time_local": "2026-07-05 11:27:54"
+  },
+  "yesterday": {
+    "source": "KMDPOOLE58",
+    "date": "2026-07-04",
+    "temp_high_f": null,
+    "temp_low_f": null,
+    "temp_avg_f": null,
+    "humidity_high_pct": 94,
+    "humidity_low_pct": 36,
+    "humidity_avg_pct": 66,
+    "wind_avg_mph": 4,
+    "wind_high_mph": 20,
+    "wind_gust_high_mph": 20,
+    "wind_dir_avg_deg": 289,
+    "precip_total_in": 0.05,
+    "narrative": "Yesterday at the farm: 0.05 inches of rain, gusts to 20 mph."
   },
   "soil_temperature": {
     "source": "Open-Meteo",
