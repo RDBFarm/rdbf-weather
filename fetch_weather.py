@@ -176,7 +176,7 @@ def classify_precip(code):
 # ── 3. NWS Alerts ────────────────────────────────────────────────────────────
 def get_nws_alerts():
     out = {"source": "api.weather.gov", "active_count": 0, "alerts": [],
-           "frost_or_freeze_active": False}
+           "frost_or_freeze_active": False, "test_messages_filtered": 0}
     data = fetch_json(f"https://api.weather.gov/alerts/active?point={LAT},{LON}",
                       headers={"Accept": "application/geo+json"})
     if data is None:
@@ -185,6 +185,16 @@ def get_nws_alerts():
     for feat in data.get("features", []):
         p = feat.get("properties", {})
         event = p.get("event")
+
+        # NWS periodically pushes non-weather "Test Message" entries to verify
+        # the feed. Exclude them from the real alert count, but record that one
+        # was seen so it's accounted for, not silently dropped.
+        status = (p.get("status") or "").lower()
+        is_test = (status == "test") or (event and "test message" in event.lower())
+        if is_test:
+            out["test_messages_filtered"] += 1
+            continue
+
         out["alerts"].append({
             "event": event,
             "severity": p.get("severity"),
