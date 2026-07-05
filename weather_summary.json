@@ -1,5 +1,5 @@
 {
-  "generated_et": "2026-07-05T11:36:42-04:00",
+  "generated_et": "2026-07-05T18:33:23-04:00",
   "run_type": "scheduled",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
@@ -7,13 +7,13 @@
   },
   "current_conditions": {
     "source": "KMDPOOLE58",
-    "temp_f": 88,
-    "humidity_pct": 55,
-    "wind_mph": 3,
-    "wind_dir_deg": 6,
+    "temp_f": 94,
+    "humidity_pct": 50,
+    "wind_mph": 8,
+    "wind_dir_deg": 176,
     "precip_today_in": 0.0,
     "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-07-05 11:36:34"
+    "obs_time_local": "2026-07-05 18:33:12"
   },
   "yesterday": {
     "source": "KMDPOOLE58",
@@ -33,15 +33,15 @@
   },
   "soil_temperature": {
     "source": "Open-Meteo",
-    "surface_0cm_f": 92.7,
-    "depth_6cm_f": 82.8,
-    "reading_time_et": "2026-07-05 11:00 AM",
+    "surface_0cm_f": 86.8,
+    "depth_6cm_f": 89.4,
+    "reading_time_et": "2026-07-05 6:00 PM",
     "planting_threshold_f": 70,
     "threshold_reached_6cm": true,
     "trend_7day": "warming"
   },
   "precipitation": {
-    "type_today": "none",
+    "type_today": "rain",
     "rule": "rain -> Weather Underground actuals; snow/freezing rain -> Open-Meteo ESTIMATE requiring verbal confirmation; fog is not precip",
     "today_actual_in": 0.0,
     "today_estimate_note": null,
@@ -144,57 +144,57 @@
       },
       {
         "date": "2026-07-05",
-        "weathercode": 3,
-        "precip_type": "none",
-        "precip_sum_mm": 0.0,
-        "rain_sum_mm": 0.0,
+        "weathercode": 65,
+        "precip_type": "rain",
+        "precip_sum_mm": 38.5,
+        "rain_sum_mm": 38.5,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 49
+      },
+      {
+        "date": "2026-07-06",
+        "weathercode": 65,
+        "precip_type": "rain",
+        "precip_sum_mm": 16.2,
+        "rain_sum_mm": 16.2,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 49
+      },
+      {
+        "date": "2026-07-07",
+        "weathercode": 51,
+        "precip_type": "rain",
+        "precip_sum_mm": 1.15,
+        "rain_sum_mm": 0.9,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 54
+      },
+      {
+        "date": "2026-07-08",
+        "weathercode": 53,
+        "precip_type": "rain",
+        "precip_sum_mm": 2.3,
+        "rain_sum_mm": 1.1,
         "snowfall_sum_cm": 0.0,
         "precip_prob_pct": 34
       },
       {
-        "date": "2026-07-06",
-        "weathercode": 82,
-        "precip_type": "rain",
-        "precip_sum_mm": 19.4,
-        "rain_sum_mm": 19.4,
-        "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 76
-      },
-      {
-        "date": "2026-07-07",
-        "weathercode": 80,
-        "precip_type": "rain",
-        "precip_sum_mm": 8.3,
-        "rain_sum_mm": 0.4,
-        "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 76
-      },
-      {
-        "date": "2026-07-08",
-        "weathercode": 80,
-        "precip_type": "rain",
-        "precip_sum_mm": 5.1,
-        "rain_sum_mm": 1.2,
-        "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 47
-      },
-      {
         "date": "2026-07-09",
-        "weathercode": 81,
+        "weathercode": 51,
         "precip_type": "rain",
-        "precip_sum_mm": 6.3,
-        "rain_sum_mm": 3.1,
+        "precip_sum_mm": 0.5,
+        "rain_sum_mm": 0.2,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 39
+        "precip_prob_pct": 59
       },
       {
         "date": "2026-07-10",
-        "weathercode": 51,
+        "weathercode": 53,
         "precip_type": "rain",
-        "precip_sum_mm": 1.2,
-        "rain_sum_mm": 0.0,
+        "precip_sum_mm": 1.9,
+        "rain_sum_mm": 0.9,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 44
+        "precip_prob_pct": 42
       },
       {
         "date": "2026-07-11",
@@ -203,26 +203,34 @@
         "precip_sum_mm": 0.0,
         "rain_sum_mm": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 36
+        "precip_prob_pct": 24
       }
     ]
   },
   "nws_alerts": {
     "source": "api.weather.gov",
-    "active_count": 0,
-    "alerts": [],
+    "active_count": 1,
+    "alerts": [
+      {
+        "event": "Flood Watch",
+        "severity": "Severe",
+        "headline": "Flood Watch issued July 5 at 5:22PM EDT until July 6 at 1:00AM EDT by NWS Baltimore MD/Washington DC",
+        "onset": "2026-07-05T17:22:00-04:00",
+        "ends": "2026-07-06T01:00:00-04:00"
+      }
+    ],
     "frost_or_freeze_active": false,
     "test_messages_filtered": 1
   },
   "uv_index": {
     "source": "currentuvindex.com",
     "timezone": "America/New_York",
-    "current_uvi": 6.5,
-    "above_3_time_et": "12:00 PM",
-    "below_3_time_et": "5:00 PM",
-    "peak_uvi": 9.5,
-    "peak_time_et": "1:00 PM",
-    "sanity_check_passed": true
+    "current_uvi": 0,
+    "above_3_time_et": null,
+    "below_3_time_et": null,
+    "peak_uvi": 0,
+    "peak_time_et": "7:00 PM",
+    "sanity_check_passed": null
   },
   "drought_status": {
     "source": "US Drought Monitor",

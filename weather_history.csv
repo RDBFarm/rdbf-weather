@@ -1,2 +1,2 @@
 date,temp_f,humidity_pct,precip_today_in,soil_0cm_f,soil_6cm_f,soil_trend_7day,precip_type_today,nws_active_alerts,uv_peak,drought_week_ending,drought_d0_pct,drought_d1_pct,drought_d2_pct,drought_d3_pct,drought_d4_pct,yest_date,yest_temp_high_f,yest_temp_low_f,yest_humidity_avg_pct,yest_wind_avg_mph,yest_wind_gust_high_mph,yest_precip_total_in
-2026-07-05,88,55,0.0,92.7,82.8,warming,none,0,9.5,2026-07-06,100.0,100.0,2.87,0.0,0.0,2026-07-04,101,73,66,4,20,0.05
+2026-07-05,94,50,0.0,86.8,89.4,warming,rain,1,0,2026-07-06,100.0,100.0,2.87,0.0,0.0,2026-07-04,101,73,66,4,20,0.05
