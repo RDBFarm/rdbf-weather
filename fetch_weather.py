@@ -108,8 +108,10 @@ def get_wu():
     return out
 
 
-def get_wu_7day_precip():
-    """Daily precip totals for the past 7 days from the station (actuals)."""
+def get_wu_7day_summary():
+    """Full daily summaries for the past 7 days from the station (actuals).
+    Returns the raw 'summaries' list so callers can pull precip history AND
+    build the 'yesterday' report from a single API call."""
     if not WU_API_KEY:
         return None
     url = (f"https://api.weather.com/v2/pws/dailysummary/7day"
@@ -117,9 +119,16 @@ def get_wu_7day_precip():
     data = fetch_json(url)
     if not data:
         return None
+    return data.get("summaries") or None
+
+
+def wu_7day_precip(summaries):
+    """Extract just date + precip from the summaries list (past 7 days)."""
+    if not summaries:
+        return None
     days = []
     try:
-        for s in data.get("summaries", []):
+        for s in summaries:
             days.append({
                 "date": (s.get("obsTimeLocal") or "")[:10] or None,
                 "precip_in": s.get("imperial", {}).get("precipTotal"),
@@ -128,6 +137,63 @@ def get_wu_7day_precip():
         errors.append(f"Weather Underground 7-day parse error: {e}")
         return None
     return days or None
+
+
+def wu_yesterday(summaries, now_local):
+    """Build yesterday's daily summary from the station's own records.
+    Matches the summary row whose local date == yesterday. All actuals; any
+    field the station didn't report stays null (never estimated)."""
+    out = {"source": STATION_ID, "date": None,
+           "temp_high_f": None, "temp_low_f": None, "temp_avg_f": None,
+           "humidity_high_pct": None, "humidity_low_pct": None, "humidity_avg_pct": None,
+           "wind_avg_mph": None, "wind_high_mph": None, "wind_gust_high_mph": None,
+           "wind_dir_avg_deg": None, "precip_total_in": None,
+           "narrative": None}
+    if not summaries:
+        errors.append("Yesterday report: no station summaries available")
+        return out
+
+    yday = (now_local.date() - timedelta(days=1)).isoformat()
+    match = None
+    for s in summaries:
+        if (s.get("obsTimeLocal") or "")[:10] == yday:
+            match = s
+            break
+    if match is None:
+        errors.append(f"Yesterday report: no station record for {yday}")
+        return out
+
+    imp = match.get("imperial", {})
+    out["date"] = yday
+    out["temp_high_f"] = match.get("tempHigh")
+    out["temp_low_f"] = match.get("tempLow")
+    out["temp_avg_f"] = match.get("tempAvg")
+    out["humidity_high_pct"] = match.get("humidityHigh")
+    out["humidity_low_pct"] = match.get("humidityLow")
+    out["humidity_avg_pct"] = match.get("humidityAvg")
+    out["wind_dir_avg_deg"] = match.get("winddirAvg")
+    out["wind_avg_mph"] = imp.get("windspeedAvg")
+    out["wind_high_mph"] = imp.get("windspeedHigh")
+    out["wind_gust_high_mph"] = imp.get("windgustHigh")
+    out["precip_total_in"] = imp.get("precipTotal")
+
+    # Plain-language narrative for the voice debrief. Only mentions values that
+    # are present; skips any the station didn't report rather than inventing them.
+    hi, lo = out["temp_high_f"], out["temp_low_f"]
+    rain = out["precip_total_in"]
+    gust = out["wind_gust_high_mph"]
+    parts = []
+    if hi is not None and lo is not None:
+        parts.append(f"High {hi:.0f}, low {lo:.0f}")
+    elif hi is not None:
+        parts.append(f"High {hi:.0f}")
+    if rain is not None:
+        parts.append("no rain" if rain == 0 else f"{rain:.2f} inches of rain")
+    if gust is not None and gust >= 20:
+        parts.append(f"gusts to {gust:.0f} mph")
+    out["narrative"] = ("Yesterday at the farm: " + ", ".join(parts) + "."
+                        if parts else None)
+    return out
 
 
 # ── 2. Open-Meteo (soil temps, precip history + forecast, weathercode) ──────
@@ -344,6 +410,9 @@ HISTORY_COLUMNS = [
     "uv_peak", "drought_week_ending",
     "drought_d0_pct", "drought_d1_pct", "drought_d2_pct",
     "drought_d3_pct", "drought_d4_pct",
+    "yest_date", "yest_temp_high_f", "yest_temp_low_f",
+    "yest_humidity_avg_pct", "yest_wind_avg_mph",
+    "yest_wind_gust_high_mph", "yest_precip_total_in",
 ]
 
 
@@ -358,6 +427,7 @@ def archive_history(summary):
     nws = summary.get("nws_alerts", {})
     uv = summary.get("uv_index", {})
     dr = summary.get("drought_status", {})
+    yd = summary.get("yesterday", {})
 
     row = {
         "date": today,
@@ -376,6 +446,13 @@ def archive_history(summary):
         "drought_d2_pct": dr.get("d2_pct"),
         "drought_d3_pct": dr.get("d3_pct"),
         "drought_d4_pct": dr.get("d4_pct"),
+        "yest_date": yd.get("date"),
+        "yest_temp_high_f": yd.get("temp_high_f"),
+        "yest_temp_low_f": yd.get("temp_low_f"),
+        "yest_humidity_avg_pct": yd.get("humidity_avg_pct"),
+        "yest_wind_avg_mph": yd.get("wind_avg_mph"),
+        "yest_wind_gust_high_mph": yd.get("wind_gust_high_mph"),
+        "yest_precip_total_in": yd.get("precip_total_in"),
     }
 
     # Read existing rows (if any), keyed by date.
@@ -409,7 +486,9 @@ def main():
     previous = load_previous()
 
     wu = get_wu()
-    wu_7day = get_wu_7day_precip()
+    wu_summaries = get_wu_7day_summary()
+    wu_7day = wu_7day_precip(wu_summaries)
+    yesterday = wu_yesterday(wu_summaries, now_local)
     om = get_open_meteo()
     nws = get_nws_alerts()
 
@@ -486,6 +565,7 @@ def main():
             "errors_this_run": errors,
         },
         "current_conditions": wu,
+        "yesterday": yesterday,
         "soil_temperature": soil,
         "precipitation": precip,
         "forecast_daily": {"source": "Open-Meteo", "days": forecast_days},
