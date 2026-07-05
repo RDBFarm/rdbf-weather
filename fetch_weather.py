@@ -165,9 +165,9 @@ def wu_yesterday(summaries, now_local):
 
     imp = match.get("imperial", {})
     out["date"] = yday
-    out["temp_high_f"] = match.get("tempHigh")
-    out["temp_low_f"] = match.get("tempLow")
-    out["temp_avg_f"] = match.get("tempAvg")
+    out["temp_high_f"] = imp.get("tempHigh")
+    out["temp_low_f"] = imp.get("tempLow")
+    out["temp_avg_f"] = imp.get("tempAvg")
     out["humidity_high_pct"] = match.get("humidityHigh")
     out["humidity_low_pct"] = match.get("humidityLow")
     out["humidity_avg_pct"] = match.get("humidityAvg")
