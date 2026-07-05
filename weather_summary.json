@@ -1,5 +1,5 @@
 {
-  "generated_et": "2026-07-05T11:10:49-04:00",
+  "generated_et": "2026-07-05T11:17:50-04:00",
   "run_type": "scheduled",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
@@ -7,13 +7,13 @@
   },
   "current_conditions": {
     "source": "KMDPOOLE58",
-    "temp_f": 87,
-    "humidity_pct": 58,
+    "temp_f": 88,
+    "humidity_pct": 57,
     "wind_mph": 3,
-    "wind_dir_deg": 124,
+    "wind_dir_deg": 76,
     "precip_today_in": 0.0,
     "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-07-05 11:10:44"
+    "obs_time_local": "2026-07-05 11:17:44"
   },
   "soil_temperature": {
     "source": "Open-Meteo",
@@ -193,17 +193,10 @@
   },
   "nws_alerts": {
     "source": "api.weather.gov",
-    "active_count": 1,
-    "alerts": [
-      {
-        "event": "Test Message",
-        "severity": "Unknown",
-        "headline": null,
-        "onset": null,
-        "ends": null
-      }
-    ],
-    "frost_or_freeze_active": false
+    "active_count": 0,
+    "alerts": [],
+    "frost_or_freeze_active": false,
+    "test_messages_filtered": 1
   },
   "uv_index": {
     "source": "currentuvindex.com",
