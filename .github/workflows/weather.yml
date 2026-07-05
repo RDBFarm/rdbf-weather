@@ -1,4 +1,5 @@
 name: RDBF Weather Pre-Processor
+
 on:
   schedule:
     # 09:35 UTC = 5:35 AM EDT (4:35 AM EST in winter).
@@ -6,27 +7,33 @@ on:
     - cron: "35 9 * * *"
     - cron: "35 21 * * *"
   workflow_dispatch: {}   # allows manual "Run workflow" button for testing
+
 # Prevent two runs from pushing to main at the same time. Queue them instead
 # of running concurrently, so pushes never collide.
 concurrency:
   group: weather-writer
   cancel-in-progress: false
+
 permissions:
   contents: write
+
 jobs:
   fetch-weather:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Run weather pre-processor
         env:
           WU_API_KEY: ${{ secrets.WU_API_KEY }}
         run: python fetch_weather.py
+
       - name: Commit updated weather_summary.json
         run: |
           git config user.name "rdbf-weather-bot"
