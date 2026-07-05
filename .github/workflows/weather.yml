@@ -1,4 +1,4 @@
-yamlname: RDBF Weather Pre-Processor
+name: RDBF Weather Pre-Processor
 on:
   schedule:
     # 09:35 UTC = 5:35 AM EDT (4:35 AM EST in winter).
