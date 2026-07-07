@@ -8,8 +8,7 @@ on:
     - cron: "35 21 * * *"
   workflow_dispatch: {}   # allows manual "Run workflow" button for testing
 
-# Prevent two runs from pushing to main at the same time. Queue them instead
-# of running concurrently, so pushes never collide.
+# Queue runs so they never overlap.
 concurrency:
   group: weather-writer
   cancel-in-progress: false
@@ -34,26 +33,43 @@ jobs:
           WU_API_KEY: ${{ secrets.WU_API_KEY }}
         run: python fetch_weather.py
 
-      - name: Commit updated weather_summary.json
+      - name: Commit updated weather files
         run: |
           git config user.name "rdbf-weather-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add weather_summary.json weather_history.csv
-          # Nothing changed? Exit cleanly.
-          if git diff --cached --quiet; then
-            echo "No weather changes to commit."
-            exit 0
-          fi
-          git commit -m "Weather update $(date -u +'%Y-%m-%d %H:%M UTC')"
-          # Push, but if the remote moved since checkout, rebase on top and retry.
-          for attempt in 1 2 3; do
+
+          # weather_summary.json  = snapshot (newest wins).
+          # weather_history.csv   = ledger (never lose a row).
+          #
+          # On a push rejection we sync to the remote and REGENERATE both files
+          # against the remote's state before retrying. Because the Python
+          # merges history by date (updates today's row, keeps all prior rows),
+          # re-running after syncing produces a correct union with no conflict
+          # and no lost history.
+          for attempt in 1 2 3 4 5; do
+            git add weather_summary.json weather_history.csv
+            if git diff --cached --quiet; then
+              echo "No weather changes to commit."
+              exit 0
+            fi
+            git commit -m "Weather update $(date -u +'%Y-%m-%d %H:%M UTC')"
+
             if git push; then
               echo "Pushed on attempt $attempt."
               exit 0
             fi
-            echo "Push rejected — pulling remote changes and retrying ($attempt)."
-            git pull --rebase --autostash origin main
-            sleep 3
+
+            echo "Push rejected — syncing to remote, then regenerating (attempt $attempt)."
+            git reset --hard HEAD~1
+            git fetch origin main
+            git reset --hard origin/main
+            # Re-run the pre-processor against the remote's history so today's
+            # row is merged into the up-to-date ledger, not an overwrite of it.
+            python fetch_weather.py
+            sleep 2
           done
-          echo "Push still failing after 3 attempts."
+
+          echo "Push still failing after 5 attempts."
           exit 1
+        env:
+          WU_API_KEY: ${{ secrets.WU_API_KEY }}
