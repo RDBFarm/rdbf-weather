@@ -1,5 +1,5 @@
 {
-  "generated_et": "2026-07-07T08:16:37-04:00",
+  "generated_et": "2026-07-07T08:20:54-04:00",
   "run_type": "scheduled",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
@@ -10,10 +10,10 @@
     "temp_f": 72,
     "humidity_pct": 98,
     "wind_mph": 0,
-    "wind_dir_deg": 31,
+    "wind_dir_deg": 335,
     "precip_today_in": 0.03,
     "precip_rate_in_hr": 0.02,
-    "obs_time_local": "2026-07-07 08:16:33"
+    "obs_time_local": "2026-07-07 08:20:44"
   },
   "yesterday": {
     "source": "KMDPOOLE58",
