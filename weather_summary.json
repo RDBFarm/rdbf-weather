@@ -1,5 +1,5 @@
 {
-  "generated_et": "2026-07-08T07:26:35-04:00",
+  "generated_et": "2026-07-08T18:36:01-04:00",
   "run_type": "scheduled",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
@@ -7,13 +7,13 @@
   },
   "current_conditions": {
     "source": "KMDPOOLE58",
-    "temp_f": 72,
-    "humidity_pct": 93,
-    "wind_mph": 4,
-    "wind_dir_deg": 64,
+    "temp_f": 81,
+    "humidity_pct": 77,
+    "wind_mph": 2,
+    "wind_dir_deg": 104,
     "precip_today_in": 0.02,
     "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-07-08 07:26:29"
+    "obs_time_local": "2026-07-08 18:35:51"
   },
   "yesterday": {
     "source": "KMDPOOLE58",
@@ -33,9 +33,9 @@
   },
   "soil_temperature": {
     "source": "Open-Meteo",
-    "surface_0cm_f": 71.6,
-    "depth_6cm_f": 73.7,
-    "reading_time_et": "2026-07-08 7:00 AM",
+    "surface_0cm_f": 79.9,
+    "depth_6cm_f": 79.1,
+    "reading_time_et": "2026-07-08 6:00 PM",
     "planting_threshold_f": 70,
     "threshold_reached_6cm": true,
     "trend_7day": "cooling"
@@ -153,48 +153,48 @@
       },
       {
         "date": "2026-07-09",
-        "weathercode": 51,
+        "weathercode": 65,
         "precip_type": "rain",
-        "precip_sum_mm": 0.8,
-        "rain_sum_mm": 0.8,
+        "precip_sum_mm": 28.1,
+        "rain_sum_mm": 28.1,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 82
+        "precip_prob_pct": 53
       },
       {
         "date": "2026-07-10",
-        "weathercode": 95,
-        "precip_type": "thunderstorm",
-        "precip_sum_mm": 7.0,
-        "rain_sum_mm": 3.9,
+        "weathercode": 82,
+        "precip_type": "rain",
+        "precip_sum_mm": 53.85,
+        "rain_sum_mm": 49.55,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 64
+        "precip_prob_pct": 71
       },
       {
         "date": "2026-07-11",
-        "weathercode": 53,
+        "weathercode": 81,
         "precip_type": "rain",
-        "precip_sum_mm": 0.7,
-        "rain_sum_mm": 0.0,
+        "precip_sum_mm": 9.7,
+        "rain_sum_mm": 5.5,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 28
+        "precip_prob_pct": 41
       },
       {
         "date": "2026-07-12",
-        "weathercode": 53,
+        "weathercode": 80,
         "precip_type": "rain",
-        "precip_sum_mm": 2.0,
-        "rain_sum_mm": 0.0,
+        "precip_sum_mm": 6.0,
+        "rain_sum_mm": 5.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 8
+        "precip_prob_pct": 14
       },
       {
         "date": "2026-07-13",
-        "weathercode": 2,
+        "weathercode": 3,
         "precip_type": "none",
         "precip_sum_mm": 0.0,
         "rain_sum_mm": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 12
+        "precip_prob_pct": 13
       },
       {
         "date": "2026-07-14",
@@ -203,7 +203,7 @@
         "precip_sum_mm": 0.0,
         "rain_sum_mm": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 9
+        "precip_prob_pct": 4
       }
     ]
   },
@@ -217,11 +217,11 @@
   "uv_index": {
     "source": "currentuvindex.com",
     "timezone": "America/New_York",
-    "current_uvi": 0,
+    "current_uvi": 0.9,
     "above_3_time_et": null,
     "below_3_time_et": null,
-    "peak_uvi": 1.2,
-    "peak_time_et": "11:00 AM",
+    "peak_uvi": 0.2,
+    "peak_time_et": "7:00 PM",
     "sanity_check_passed": null
   },
   "drought_status": {
