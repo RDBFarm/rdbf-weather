@@ -22,6 +22,7 @@ Data-integrity rules (non-negotiable):
 import csv
 import io
 import json
+import math
 import os
 import sys
 import urllib.request
@@ -201,7 +202,8 @@ def get_open_meteo():
     # Confirmed-working URL from the April session, plus sunrise/sunset for UV sanity checks.
     url = ("https://api.open-meteo.com/v1/forecast"
            f"?latitude={LAT}&longitude={LON}"
-           "&hourly=soil_temperature_0cm,soil_temperature_6cm,snowfall,snow_depth,weathercode,rain"
+           "&hourly=soil_temperature_0cm,soil_temperature_6cm,snowfall,snow_depth,weathercode,rain,"
+           "windspeed_10m,winddirection_10m,windgusts_10m"
            "&daily=weathercode,snowfall_sum,rain_sum,precipitation_sum,"
            "precipitation_probability_max,sunrise,sunset,"
            "temperature_2m_max,temperature_2m_min,"
@@ -240,6 +242,132 @@ def classify_precip(code):
     if code in (95, 96, 99):
         return "thunderstorm"
     return "none"
+
+
+# ── Wind direction helpers ───────────────────────────────────────────────────
+# Directions are the meteorological convention: the direction the wind blows
+# FROM. So 225 degrees = wind out of the southwest ("southwesterly").
+_COMPASS_16 = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+               "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+_COMPASS_8_WORD = ["north", "northeast", "east", "southeast",
+                   "south", "southwest", "west", "northwest"]
+
+
+def deg_to_compass(deg):
+    """Degrees -> 16-point compass abbreviation (e.g. 200 -> 'SSW'). None-safe."""
+    if deg is None:
+        return None
+    return _COMPASS_16[int((deg % 360) / 22.5 + 0.5) % 16]
+
+
+def deg_to_word(deg):
+    """Degrees -> spoken 8-point word (e.g. 225 -> 'southwest'). None-safe."""
+    if deg is None:
+        return None
+    return _COMPASS_8_WORD[int((deg % 360) / 45 + 0.5) % 8]
+
+
+def circular_mean_dir(pairs):
+    """Speed-weighted average wind direction for a set of (degrees, speed) pairs.
+
+    Directions are circular, so a plain numeric average is wrong (350 and 10
+    should average to 0, not 180). We convert each direction to a unit vector,
+    weight it by that hour's wind speed (so calm hours barely count), sum, and
+    take the resulting angle. Returns degrees (0-360) or None if no usable data."""
+    x = y = tot = 0.0
+    has_speed = any(s for _, s in pairs if s)
+    for deg, spd in pairs:
+        if deg is None:
+            continue
+        w = (spd if (spd and spd > 0) else 0.0) if has_speed else 1.0
+        if w <= 0:
+            continue
+        r = math.radians(deg)
+        x += w * math.cos(r)
+        y += w * math.sin(r)
+        tot += w
+    if tot == 0:
+        return None
+    return math.degrees(math.atan2(y, x)) % 360
+
+
+def _wind_narrative(blocks):
+    """Plain-language, factual wind sentence from the per-period blocks.
+    States direction and speed only — no advice. Notes when the wind shifts."""
+    if not blocks:
+        return None
+    when = {"morning": "this morning", "afternoon": "in the afternoon",
+            "evening": "in the evening"}
+    parts = []
+    prev_word = None
+    for idx, b in enumerate(blocks):
+        word = b.get("from_word") or "variable"
+        spd = b.get("avg_speed_mph")
+        gust = b.get("max_gust_mph")
+        spd_txt = f" around {spd:.0f} mph" if spd is not None else ""
+        gust_txt = f" (gusting to {gust:.0f})" if (gust is not None and gust >= 20) else ""
+        w = when[b["period"]]
+        if idx == 0:
+            parts.append(f"Winds from the {word}{spd_txt} {w}{gust_txt}")
+        elif word != prev_word:
+            parts.append(f"shifting to the {word}{spd_txt} {w}{gust_txt}")
+        else:
+            parts.append(f"staying out of the {word}{spd_txt} {w}{gust_txt}")
+        prev_word = word
+    return ", ".join(parts) + "."
+
+
+def build_wind_today(hourly, now_local):
+    """Today's wind by period (morning / afternoon / evening) with a spoken
+    narrative. Uses Open-Meteo hourly wind. Any period with no data is skipped;
+    if there is no wind data at all, the block is empty and a note is logged."""
+    out = {"source": "Open-Meteo", "date": None, "periods": [], "narrative": None}
+    if not hourly:
+        return out
+    times = hourly.get("time") or []
+    dirs = hourly.get("winddirection_10m") or []
+    spds = hourly.get("windspeed_10m") or []
+    gusts = hourly.get("windgusts_10m") or []
+    today = now_local.date().isoformat()
+    out["date"] = today
+
+    rows = []  # (hour, dir_deg, speed, gust) for today only
+    for i, t in enumerate(times):
+        if not t.startswith(today):
+            continue
+        try:
+            hr = datetime.fromisoformat(t).hour
+        except (ValueError, TypeError):
+            continue
+        rows.append((hr,
+                     dirs[i] if i < len(dirs) else None,
+                     spds[i] if i < len(spds) else None,
+                     gusts[i] if i < len(gusts) else None))
+    if not rows:
+        errors.append("Wind narrative: no hourly wind data for today")
+        return out
+
+    # [start_hour, end_hour) in local time
+    period_defs = [("morning", 6, 12), ("afternoon", 12, 18), ("evening", 18, 23)]
+    for label, h0, h1 in period_defs:
+        pr = [(d, s, g) for (hr, d, s, g) in rows if h0 <= hr < h1]
+        pairs = [(d, s) for (d, s, g) in pr if d is not None]
+        if not pairs:
+            continue
+        mean_deg = circular_mean_dir(pairs)
+        speeds = [s for (d, s, g) in pr if s is not None]
+        period_gusts = [g for (d, s, g) in pr if g is not None]
+        out["periods"].append({
+            "period": label,
+            "from_deg": round(mean_deg) if mean_deg is not None else None,
+            "from_compass": deg_to_compass(mean_deg),
+            "from_word": deg_to_word(mean_deg),
+            "avg_speed_mph": round(sum(speeds) / len(speeds), 1) if speeds else None,
+            "max_gust_mph": max(period_gusts) if period_gusts else None,
+        })
+
+    out["narrative"] = _wind_narrative(out["periods"])
+    return out
 
 
 # ── 3. NWS Alerts ────────────────────────────────────────────────────────────
@@ -568,10 +696,12 @@ def main():
             "threshold_reached_6cm": None, "trend_7day": None}
     forecast_days, sunrise_iso, sunset_iso = [], None, None
     precip_type_today = "unknown"
+    wind_today = {"source": "Open-Meteo", "date": None, "periods": [], "narrative": None}
 
     if om:
         h = om.get("hourly", {})
         times = h.get("time", [])
+        wind_today = build_wind_today(h, now_local)
         cur0 = latest_non_null(times, h.get("soil_temperature_0cm"), now_local)
         cur6 = latest_non_null(times, h.get("soil_temperature_6cm"), now_local)
         if cur0:
@@ -613,6 +743,7 @@ def main():
                 "wind_max_mph": col("windspeed_10m_max")[i],
                 "wind_gust_max_mph": col("windgusts_10m_max")[i],
                 "wind_dir_deg": col("winddirection_10m_dominant")[i],
+                "wind_dir_compass": deg_to_compass(col("winddirection_10m_dominant")[i]),
             })
         today_str = now_local.strftime("%Y-%m-%d")
         for i, date in enumerate(d.get("time", [])):
@@ -639,7 +770,7 @@ def main():
     }
 
     summary = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "generated_et": now_local.isoformat(timespec="seconds"),
         "run_type": os.environ.get("RUN_TYPE", "scheduled"),
         "data_integrity": {
@@ -652,6 +783,7 @@ def main():
         "precipitation": precip,
         "forecast_daily": {"source": "Open-Meteo", "days": forecast_days},
         "forecast_3day": build_forecast_3day(forecast_days, now_local),
+        "wind_today": wind_today,
         "nws_alerts": nws,
         "uv_index": uv,
         "drought_status": drought,
