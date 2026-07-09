@@ -16,15 +16,20 @@ concurrency:
 permissions:
   contents: write
 
+# A manual "Run workflow" is tagged run_type=manual in the JSON; the two
+# scheduled runs are tagged run_type=scheduled. Lets you tell test runs apart.
+env:
+  RUN_TYPE: ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'scheduled' }}
+
 jobs:
   fetch-weather:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -32,6 +37,61 @@ jobs:
         env:
           WU_API_KEY: ${{ secrets.WU_API_KEY }}
         run: python fetch_weather.py
+
+      # Human-readable at-a-glance status on the run's Summary page, so you can
+      # see which sources returned data without opening the JSON.
+      - name: Post run summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+
+          lines = []
+          try:
+              with open("weather_summary.json") as f:
+                  d = json.load(f)
+          except Exception as e:
+              d = None
+              lines.append(f"weather_summary.json could not be read: {e}")
+
+          if d:
+              cc = d.get("current_conditions", {})
+              soil = d.get("soil_temperature", {})
+              nws = d.get("nws_alerts", {})
+              uv = d.get("uv_index", {})
+              dr = d.get("drought_status", {})
+              rows = [
+                  ("Weather Underground (current)", cc.get("temp_f") is not None),
+                  ("Open-Meteo (soil / forecast)", soil.get("surface_0cm_f") is not None),
+                  ("NWS alerts", nws.get("active_count") is not None),
+                  ("UV index", uv.get("current_uvi") is not None),
+                  ("Drought Monitor", dr.get("week_ending") is not None),
+              ]
+              errs = d.get("data_integrity", {}).get("errors_this_run", []) or []
+              ok_count = sum(1 for _, c in rows if c)
+              lines.append(f"## RDBF Weather run — {d.get('generated_et', '?')}")
+              lines.append("")
+              lines.append(f"**{ok_count}/{len(rows)} sources returned data**  ·  "
+                           f"run type: `{d.get('run_type', '?')}`")
+              lines.append("")
+              lines.append("| Source | Status |")
+              lines.append("|--------|:------:|")
+              for name, c in rows:
+                  lines.append(f"| {name} | {'✅' if c else '⚠️'} |")
+              lines.append("")
+              if errs:
+                  lines.append("### Notes this run")
+                  lines.extend(f"- {e}" for e in errs)
+              else:
+                  lines.append("_No errors logged this run._")
+
+          text = "\n".join(lines) + "\n"
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_path:
+              with open(summary_path, "a") as f:
+                  f.write(text)
+          print(text)
+          PY
 
       - name: Commit updated weather files
         run: |

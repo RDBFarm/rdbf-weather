@@ -203,8 +203,11 @@ def get_open_meteo():
            f"?latitude={LAT}&longitude={LON}"
            "&hourly=soil_temperature_0cm,soil_temperature_6cm,snowfall,snow_depth,weathercode,rain"
            "&daily=weathercode,snowfall_sum,rain_sum,precipitation_sum,"
-           "precipitation_probability_max,sunrise,sunset"
-           "&temperature_unit=fahrenheit&timezone=America%2FNew_York&past_days=7")
+           "precipitation_probability_max,sunrise,sunset,"
+           "temperature_2m_max,temperature_2m_min,"
+           "windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant"
+           "&temperature_unit=fahrenheit&windspeed_unit=mph"
+           "&timezone=America%2FNew_York&past_days=7")
     return fetch_json(url)
 
 
@@ -480,6 +483,73 @@ def archive_history(summary):
         errors.append(f"weather_history.csv write error: {type(e).__name__}: {e}")
 
 
+# ── 3-day forecast summary ───────────────────────────────────────────────────
+def build_forecast_3day(forecast_days, now_local):
+    """Surface the next 3 days for near-term farm decisions: precip, wind,
+    frost/freeze. Reports raw numbers only — no 'good spray day' judgments;
+    the operator decides. Frost <= 36F, freeze <= 32F (air temp min)."""
+    out = {"window": "next 3 days", "source": "Open-Meteo",
+           "days": [], "precip_total_in": None,
+           "any_frost": False, "any_freeze": False, "max_wind_gust_mph": None,
+           "narrative": None}
+    today = now_local.date().isoformat()
+    upcoming = [d for d in forecast_days if d["date"] >= today][:3]
+    if not upcoming:
+        errors.append("3-day forecast: no upcoming days available")
+        return out
+
+    precip_total = 0.0
+    precip_seen = False
+    gusts = []
+    for d in upcoming:
+        tmin = d.get("temp_min_f")
+        frost = tmin is not None and tmin <= 36
+        freeze = tmin is not None and tmin <= 32
+        if frost:
+            out["any_frost"] = True
+        if freeze:
+            out["any_freeze"] = True
+        p_in = d.get("precip_sum_in")
+        if p_in is not None:
+            precip_total += p_in
+            precip_seen = True
+        g = d.get("wind_gust_max_mph")
+        if g is not None:
+            gusts.append(g)
+        out["days"].append({
+            "date": d["date"],
+            "precip_type": d.get("precip_type"),
+            "precip_in": p_in,
+            "precip_prob_pct": d.get("precip_prob_pct"),
+            "temp_max_f": d.get("temp_max_f"),
+            "temp_min_f": tmin,
+            "wind_max_mph": d.get("wind_max_mph"),
+            "wind_gust_max_mph": g,
+            "frost": frost,
+            "freeze": freeze,
+        })
+
+    out["precip_total_in"] = round(precip_total, 2) if precip_seen else None
+    out["max_wind_gust_mph"] = max(gusts) if gusts else None
+
+    # Plain-language narrative — states conditions, does not advise.
+    parts = []
+    if precip_seen:
+        if precip_total == 0:
+            parts.append("no rain expected")
+        else:
+            parts.append(f"{precip_total:.2f} in rain expected")
+    if out["max_wind_gust_mph"] is not None:
+        parts.append(f"gusts to {out['max_wind_gust_mph']:.0f} mph")
+    if out["any_freeze"]:
+        parts.append("FREEZE possible")
+    elif out["any_frost"]:
+        parts.append("frost possible")
+    out["narrative"] = ("3-day outlook: " + ", ".join(parts) + "."
+                        if parts else None)
+    return out
+
+
 # ── Assemble ─────────────────────────────────────────────────────────────────
 def main():
     now_local = datetime.now(TZ)
@@ -523,15 +593,26 @@ def main():
                                   "cooling" if diff < -1.5 else "steady")
 
         d = om.get("daily", {})
+        def col(name):
+            return d.get(name) or [None]*99
         for i, date in enumerate(d.get("time", [])):
+            precip_mm = col("precipitation_sum")[i]
+            rain_mm = col("rain_sum")[i]
             forecast_days.append({
                 "date": date,
-                "weathercode": (d.get("weathercode") or [None]*99)[i],
-                "precip_type": classify_precip((d.get("weathercode") or [None]*99)[i]),
-                "precip_sum_mm": (d.get("precipitation_sum") or [None]*99)[i],
-                "rain_sum_mm": (d.get("rain_sum") or [None]*99)[i],
-                "snowfall_sum_cm": (d.get("snowfall_sum") or [None]*99)[i],
-                "precip_prob_pct": (d.get("precipitation_probability_max") or [None]*99)[i],
+                "weathercode": col("weathercode")[i],
+                "precip_type": classify_precip(col("weathercode")[i]),
+                "precip_sum_mm": precip_mm,
+                "precip_sum_in": round(precip_mm/25.4, 2) if precip_mm is not None else None,
+                "rain_sum_mm": rain_mm,
+                "rain_sum_in": round(rain_mm/25.4, 2) if rain_mm is not None else None,
+                "snowfall_sum_cm": col("snowfall_sum")[i],
+                "precip_prob_pct": col("precipitation_probability_max")[i],
+                "temp_max_f": col("temperature_2m_max")[i],
+                "temp_min_f": col("temperature_2m_min")[i],
+                "wind_max_mph": col("windspeed_10m_max")[i],
+                "wind_gust_max_mph": col("windgusts_10m_max")[i],
+                "wind_dir_deg": col("winddirection_10m_dominant")[i],
             })
         today_str = now_local.strftime("%Y-%m-%d")
         for i, date in enumerate(d.get("time", [])):
@@ -558,8 +639,9 @@ def main():
     }
 
     summary = {
+        "schema_version": "1.0",
         "generated_et": now_local.isoformat(timespec="seconds"),
-        "run_type": "scheduled",
+        "run_type": os.environ.get("RUN_TYPE", "scheduled"),
         "data_integrity": {
             "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
             "errors_this_run": errors,
@@ -569,6 +651,7 @@ def main():
         "soil_temperature": soil,
         "precipitation": precip,
         "forecast_daily": {"source": "Open-Meteo", "days": forecast_days},
+        "forecast_3day": build_forecast_3day(forecast_days, now_local),
         "nws_alerts": nws,
         "uv_index": uv,
         "drought_status": drought,

@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Local packaging / scratch — never belongs in the repo
+files.zip
+*.tmp
+
+# NOTE: weather_summary.json and weather_history.csv are intentionally NOT
+# ignored — they are the product and are committed by the Action.
