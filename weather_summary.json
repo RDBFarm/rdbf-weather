@@ -1,6 +1,6 @@
 {
   "schema_version": "1.1",
-  "generated_et": "2026-07-12T06:58:08-04:00",
+  "generated_et": "2026-07-12T18:27:24-04:00",
   "run_type": "scheduled",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
@@ -9,12 +9,12 @@
   "current_conditions": {
     "source": "KMDPOOLE58",
     "temp_f": 73,
-    "humidity_pct": 93,
-    "wind_mph": 2,
-    "wind_dir_deg": 31,
-    "precip_today_in": 0.0,
-    "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-07-12 06:58:05"
+    "humidity_pct": 92,
+    "wind_mph": 4,
+    "wind_dir_deg": 251,
+    "precip_today_in": 0.1,
+    "precip_rate_in_hr": 0.06,
+    "obs_time_local": "2026-07-12 18:27:17"
   },
   "yesterday": {
     "source": "KMDPOOLE58",
@@ -34,9 +34,9 @@
   },
   "soil_temperature": {
     "source": "Open-Meteo",
-    "surface_0cm_f": 71.9,
-    "depth_6cm_f": 73.7,
-    "reading_time_et": "2026-07-12 6:00 AM",
+    "surface_0cm_f": 81.7,
+    "depth_6cm_f": 80.9,
+    "reading_time_et": "2026-07-12 6:00 PM",
     "planting_threshold_f": 70,
     "threshold_reached_6cm": true,
     "trend_7day": "cooling"
@@ -44,7 +44,7 @@
   "precipitation": {
     "type_today": "none",
     "rule": "rain -> Weather Underground actuals; snow/freezing rain -> Open-Meteo ESTIMATE requiring verbal confirmation; fog is not precip",
-    "today_actual_in": 0.0,
+    "today_actual_in": 0.1,
     "today_estimate_note": null,
     "past_7day_station_actuals": [
       {
@@ -73,7 +73,7 @@
       },
       {
         "date": "2026-07-12",
-        "precip_in": 0.0
+        "precip_in": 0.1
       }
     ]
   },
@@ -208,50 +208,33 @@
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 17,
-        "temp_max_f": 85.5,
-        "temp_min_f": 72.6,
-        "wind_max_mph": 9.0,
-        "wind_gust_max_mph": 15.2,
-        "wind_dir_deg": 82,
+        "precip_prob_pct": 18,
+        "temp_max_f": 83.4,
+        "temp_min_f": 70.5,
+        "wind_max_mph": 11.8,
+        "wind_gust_max_mph": 15.4,
+        "wind_dir_deg": 90,
         "wind_dir_compass": "E"
       },
       {
         "date": "2026-07-13",
-        "weathercode": 3,
+        "weathercode": 1,
         "precip_type": "none",
         "precip_sum_mm": 0.0,
         "precip_sum_in": 0.0,
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 2,
-        "temp_max_f": 87.4,
-        "temp_min_f": 66.2,
-        "wind_max_mph": 7.4,
-        "wind_gust_max_mph": 15.2,
-        "wind_dir_deg": 166,
-        "wind_dir_compass": "SSE"
+        "precip_prob_pct": 1,
+        "temp_max_f": 86.3,
+        "temp_min_f": 65.6,
+        "wind_max_mph": 8.1,
+        "wind_gust_max_mph": 12.8,
+        "wind_dir_deg": 144,
+        "wind_dir_compass": "SE"
       },
       {
         "date": "2026-07-14",
-        "weathercode": 3,
-        "precip_type": "none",
-        "precip_sum_mm": 0.0,
-        "precip_sum_in": 0.0,
-        "rain_sum_mm": 0.0,
-        "rain_sum_in": 0.0,
-        "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 0,
-        "temp_max_f": 89.2,
-        "temp_min_f": 60.8,
-        "wind_max_mph": 7.3,
-        "wind_gust_max_mph": 13.7,
-        "wind_dir_deg": 221,
-        "wind_dir_compass": "SW"
-      },
-      {
-        "date": "2026-07-15",
         "weathercode": 0,
         "precip_type": "none",
         "precip_sum_mm": 0.0,
@@ -259,16 +242,16 @@
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 6,
-        "temp_max_f": 99.5,
-        "temp_min_f": 66.3,
-        "wind_max_mph": 9.8,
-        "wind_gust_max_mph": 15.4,
-        "wind_dir_deg": 285,
-        "wind_dir_compass": "WNW"
+        "precip_prob_pct": 0,
+        "temp_max_f": 91.4,
+        "temp_min_f": 65.9,
+        "wind_max_mph": 6.7,
+        "wind_gust_max_mph": 12.1,
+        "wind_dir_deg": 207,
+        "wind_dir_compass": "SSW"
       },
       {
-        "date": "2026-07-16",
+        "date": "2026-07-15",
         "weathercode": 3,
         "precip_type": "none",
         "precip_sum_mm": 0.0,
@@ -276,13 +259,30 @@
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 9,
-        "temp_max_f": 94.6,
-        "temp_min_f": 74.3,
+        "precip_prob_pct": 5,
+        "temp_max_f": 99.3,
+        "temp_min_f": 71.7,
+        "wind_max_mph": 9.7,
+        "wind_gust_max_mph": 17.4,
+        "wind_dir_deg": 292,
+        "wind_dir_compass": "WNW"
+      },
+      {
+        "date": "2026-07-16",
+        "weathercode": 95,
+        "precip_type": "thunderstorm",
+        "precip_sum_mm": 0.9,
+        "precip_sum_in": 0.04,
+        "rain_sum_mm": 0.0,
+        "rain_sum_in": 0.0,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 5,
+        "temp_max_f": 90.8,
+        "temp_min_f": 70.8,
         "wind_max_mph": 14.7,
-        "wind_gust_max_mph": 26.2,
-        "wind_dir_deg": 318,
-        "wind_dir_compass": "NW"
+        "wind_gust_max_mph": 28.0,
+        "wind_dir_deg": 327,
+        "wind_dir_compass": "NNW"
       },
       {
         "date": "2026-07-17",
@@ -293,30 +293,30 @@
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 14,
-        "temp_max_f": 91.0,
-        "temp_min_f": 67.6,
-        "wind_max_mph": 10.1,
-        "wind_gust_max_mph": 19.7,
-        "wind_dir_deg": 342,
+        "precip_prob_pct": 7,
+        "temp_max_f": 83.0,
+        "temp_min_f": 61.1,
+        "wind_max_mph": 10.0,
+        "wind_gust_max_mph": 23.3,
+        "wind_dir_deg": 340,
         "wind_dir_compass": "NNW"
       },
       {
         "date": "2026-07-18",
-        "weathercode": 81,
-        "precip_type": "rain",
-        "precip_sum_mm": 15.3,
-        "precip_sum_in": 0.6,
-        "rain_sum_mm": 12.3,
-        "rain_sum_in": 0.48,
+        "weathercode": 3,
+        "precip_type": "none",
+        "precip_sum_mm": 0.0,
+        "precip_sum_in": 0.0,
+        "rain_sum_mm": 0.0,
+        "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 36,
-        "temp_max_f": 90.6,
-        "temp_min_f": 65.8,
-        "wind_max_mph": 7.9,
-        "wind_gust_max_mph": 13.6,
-        "wind_dir_deg": 105,
-        "wind_dir_compass": "ESE"
+        "precip_prob_pct": 30,
+        "temp_max_f": 82.0,
+        "temp_min_f": 56.3,
+        "wind_max_mph": 5.2,
+        "wind_gust_max_mph": 6.0,
+        "wind_dir_deg": 1,
+        "wind_dir_compass": "N"
       }
     ]
   },
@@ -328,11 +328,11 @@
         "date": "2026-07-12",
         "precip_type": "none",
         "precip_in": 0.0,
-        "precip_prob_pct": 17,
-        "temp_max_f": 85.5,
-        "temp_min_f": 72.6,
-        "wind_max_mph": 9.0,
-        "wind_gust_max_mph": 15.2,
+        "precip_prob_pct": 18,
+        "temp_max_f": 83.4,
+        "temp_min_f": 70.5,
+        "wind_max_mph": 11.8,
+        "wind_gust_max_mph": 15.4,
         "frost": false,
         "freeze": false
       },
@@ -340,11 +340,11 @@
         "date": "2026-07-13",
         "precip_type": "none",
         "precip_in": 0.0,
-        "precip_prob_pct": 2,
-        "temp_max_f": 87.4,
-        "temp_min_f": 66.2,
-        "wind_max_mph": 7.4,
-        "wind_gust_max_mph": 15.2,
+        "precip_prob_pct": 1,
+        "temp_max_f": 86.3,
+        "temp_min_f": 65.6,
+        "wind_max_mph": 8.1,
+        "wind_gust_max_mph": 12.8,
         "frost": false,
         "freeze": false
       },
@@ -353,10 +353,10 @@
         "precip_type": "none",
         "precip_in": 0.0,
         "precip_prob_pct": 0,
-        "temp_max_f": 89.2,
-        "temp_min_f": 60.8,
-        "wind_max_mph": 7.3,
-        "wind_gust_max_mph": 13.7,
+        "temp_max_f": 91.4,
+        "temp_min_f": 65.9,
+        "wind_max_mph": 6.7,
+        "wind_gust_max_mph": 12.1,
         "frost": false,
         "freeze": false
       }
@@ -364,7 +364,7 @@
     "precip_total_in": 0.0,
     "any_frost": false,
     "any_freeze": false,
-    "max_wind_gust_mph": 15.2,
+    "max_wind_gust_mph": 15.4,
     "narrative": "3-day outlook: no rain expected, gusts to 15 mph."
   },
   "wind_today": {
@@ -373,30 +373,30 @@
     "periods": [
       {
         "period": "morning",
-        "from_deg": 50,
+        "from_deg": 48,
         "from_compass": "NE",
         "from_word": "northeast",
-        "avg_speed_mph": 7.2,
-        "max_gust_mph": 15.2
+        "avg_speed_mph": 4.6,
+        "max_gust_mph": 10.3
       },
       {
         "period": "afternoon",
-        "from_deg": 95,
+        "from_deg": 91,
         "from_compass": "E",
         "from_word": "east",
-        "avg_speed_mph": 7.7,
-        "max_gust_mph": 10.7
+        "avg_speed_mph": 8.5,
+        "max_gust_mph": 15.2
       },
       {
         "period": "evening",
-        "from_deg": 165,
+        "from_deg": 163,
         "from_compass": "SSE",
         "from_word": "south",
-        "avg_speed_mph": 6.1,
-        "max_gust_mph": 12.3
+        "avg_speed_mph": 7.4,
+        "max_gust_mph": 15.4
       }
     ],
-    "narrative": "Winds from the northeast around 7 mph this morning, shifting to the east around 8 mph in the afternoon, shifting to the south around 6 mph in the evening."
+    "narrative": "Winds from the northeast around 5 mph this morning, shifting to the east around 8 mph in the afternoon, shifting to the south around 7 mph in the evening."
   },
   "nws_alerts": {
     "source": "api.weather.gov",
@@ -408,12 +408,12 @@
   "uv_index": {
     "source": "currentuvindex.com",
     "timezone": "America/New_York",
-    "current_uvi": 0,
-    "above_3_time_et": "10:00 AM",
-    "below_3_time_et": "3:00 PM",
-    "peak_uvi": 8.1,
-    "peak_time_et": "1:00 PM",
-    "sanity_check_passed": true
+    "current_uvi": 1.2,
+    "above_3_time_et": null,
+    "below_3_time_et": null,
+    "peak_uvi": 0.4,
+    "peak_time_et": "7:00 PM",
+    "sanity_check_passed": null
   },
   "drought_status": {
     "source": "US Drought Monitor",
