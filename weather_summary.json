@@ -1,20 +1,22 @@
 {
   "schema_version": "1.1",
-  "generated_et": "2026-07-16T07:20:26-04:00",
+  "generated_et": "2026-07-16T18:31:59-04:00",
   "run_type": "scheduled",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
-    "errors_this_run": []
+    "errors_this_run": [
+      "https://api.weather.com/v2/pws/observations/current -> JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+    ]
   },
   "current_conditions": {
     "source": "KMDPOOLE58",
-    "temp_f": 78,
-    "humidity_pct": 86,
-    "wind_mph": 2,
-    "wind_dir_deg": 335,
-    "precip_today_in": 0.0,
-    "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-07-16 07:20:22"
+    "temp_f": null,
+    "humidity_pct": null,
+    "wind_mph": null,
+    "wind_dir_deg": null,
+    "precip_today_in": null,
+    "precip_rate_in_hr": null,
+    "obs_time_local": null
   },
   "yesterday": {
     "source": "KMDPOOLE58",
@@ -34,9 +36,9 @@
   },
   "soil_temperature": {
     "source": "Open-Meteo",
-    "surface_0cm_f": 75.5,
-    "depth_6cm_f": 75.6,
-    "reading_time_et": "2026-07-16 7:00 AM",
+    "surface_0cm_f": 93.1,
+    "depth_6cm_f": 89.9,
+    "reading_time_et": "2026-07-16 6:00 PM",
     "planting_threshold_f": 70,
     "threshold_reached_6cm": true,
     "trend_7day": "warming"
@@ -44,7 +46,7 @@
   "precipitation": {
     "type_today": "none",
     "rule": "rain -> Weather Underground actuals; snow/freezing rain -> Open-Meteo ESTIMATE requiring verbal confirmation; fog is not precip",
-    "today_actual_in": 0.0,
+    "today_actual_in": null,
     "today_estimate_note": null,
     "past_7day_station_actuals": [
       {
@@ -208,12 +210,12 @@
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 5,
-        "temp_max_f": 99.7,
-        "temp_min_f": 77.6,
-        "wind_max_mph": 11.5,
-        "wind_gust_max_mph": 19.7,
-        "wind_dir_deg": 292,
+        "precip_prob_pct": 4,
+        "temp_max_f": 96.6,
+        "temp_min_f": 77.5,
+        "wind_max_mph": 11.4,
+        "wind_gust_max_mph": 16.1,
+        "wind_dir_deg": 290,
         "wind_dir_compass": "WNW"
       },
       {
@@ -225,46 +227,46 @@
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 10,
-        "temp_max_f": 91.2,
-        "temp_min_f": 69.7,
-        "wind_max_mph": 10.3,
-        "wind_gust_max_mph": 20.8,
-        "wind_dir_deg": 25,
+        "precip_prob_pct": 1,
+        "temp_max_f": 91.7,
+        "temp_min_f": 70.6,
+        "wind_max_mph": 9.4,
+        "wind_gust_max_mph": 16.8,
+        "wind_dir_deg": 21,
         "wind_dir_compass": "NNE"
       },
       {
         "date": "2026-07-18",
-        "weathercode": 81,
+        "weathercode": 80,
         "precip_type": "rain",
-        "precip_sum_mm": 16.03,
-        "precip_sum_in": 0.63,
-        "rain_sum_mm": 0.3,
-        "rain_sum_in": 0.01,
+        "precip_sum_mm": 3.55,
+        "precip_sum_in": 0.14,
+        "rain_sum_mm": 0.0,
+        "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 82,
-        "temp_max_f": 79.1,
-        "temp_min_f": 68.9,
-        "wind_max_mph": 11.8,
-        "wind_gust_max_mph": 18.3,
-        "wind_dir_deg": 177,
+        "precip_prob_pct": 90,
+        "temp_max_f": 92.6,
+        "temp_min_f": 72.8,
+        "wind_max_mph": 9.9,
+        "wind_gust_max_mph": 17.7,
+        "wind_dir_deg": 173,
         "wind_dir_compass": "S"
       },
       {
         "date": "2026-07-19",
-        "weathercode": 53,
+        "weathercode": 51,
         "precip_type": "rain",
-        "precip_sum_mm": 2.0,
-        "precip_sum_in": 0.08,
+        "precip_sum_mm": 0.4,
+        "precip_sum_in": 0.02,
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 64,
-        "temp_max_f": 88.8,
-        "temp_min_f": 67.1,
+        "precip_prob_pct": 60,
+        "temp_max_f": 88.1,
+        "temp_min_f": 68.9,
         "wind_max_mph": 14.5,
-        "wind_gust_max_mph": 23.0,
-        "wind_dir_deg": 317,
+        "wind_gust_max_mph": 27.1,
+        "wind_dir_deg": 318,
         "wind_dir_compass": "NW"
       },
       {
@@ -276,33 +278,16 @@
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 9,
-        "temp_max_f": 86.7,
-        "temp_min_f": 58.2,
-        "wind_max_mph": 9.6,
-        "wind_gust_max_mph": 23.3,
-        "wind_dir_deg": 136,
-        "wind_dir_compass": "SE"
+        "precip_prob_pct": 7,
+        "temp_max_f": 85.8,
+        "temp_min_f": 58.4,
+        "wind_max_mph": 12.6,
+        "wind_gust_max_mph": 26.4,
+        "wind_dir_deg": 111,
+        "wind_dir_compass": "ESE"
       },
       {
         "date": "2026-07-21",
-        "weathercode": 95,
-        "precip_type": "thunderstorm",
-        "precip_sum_mm": 2.4,
-        "precip_sum_in": 0.09,
-        "rain_sum_mm": 0.3,
-        "rain_sum_in": 0.01,
-        "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 45,
-        "temp_max_f": 87.6,
-        "temp_min_f": 67.2,
-        "wind_max_mph": 19.4,
-        "wind_gust_max_mph": 29.1,
-        "wind_dir_deg": 304,
-        "wind_dir_compass": "NW"
-      },
-      {
-        "date": "2026-07-22",
         "weathercode": 3,
         "precip_type": "none",
         "precip_sum_mm": 0.0,
@@ -310,13 +295,30 @@
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 45,
-        "temp_max_f": 80.5,
-        "temp_min_f": 58.6,
-        "wind_max_mph": 8.2,
-        "wind_gust_max_mph": 20.6,
-        "wind_dir_deg": 351,
-        "wind_dir_compass": "N"
+        "precip_prob_pct": 51,
+        "temp_max_f": 90.4,
+        "temp_min_f": 68.7,
+        "wind_max_mph": 19.3,
+        "wind_gust_max_mph": 34.7,
+        "wind_dir_deg": 192,
+        "wind_dir_compass": "SSW"
+      },
+      {
+        "date": "2026-07-22",
+        "weathercode": 53,
+        "precip_type": "rain",
+        "precip_sum_mm": 3.9,
+        "precip_sum_in": 0.15,
+        "rain_sum_mm": 1.5,
+        "rain_sum_in": 0.06,
+        "snowfall_sum_cm": 0.0,
+        "precip_prob_pct": 51,
+        "temp_max_f": 78.1,
+        "temp_min_f": 61.1,
+        "wind_max_mph": 19.3,
+        "wind_gust_max_mph": 30.4,
+        "wind_dir_deg": 279,
+        "wind_dir_compass": "W"
       }
     ]
   },
@@ -328,11 +330,11 @@
         "date": "2026-07-16",
         "precip_type": "none",
         "precip_in": 0.0,
-        "precip_prob_pct": 5,
-        "temp_max_f": 99.7,
-        "temp_min_f": 77.6,
-        "wind_max_mph": 11.5,
-        "wind_gust_max_mph": 19.7,
+        "precip_prob_pct": 4,
+        "temp_max_f": 96.6,
+        "temp_min_f": 77.5,
+        "wind_max_mph": 11.4,
+        "wind_gust_max_mph": 16.1,
         "frost": false,
         "freeze": false
       },
@@ -340,32 +342,32 @@
         "date": "2026-07-17",
         "precip_type": "none",
         "precip_in": 0.0,
-        "precip_prob_pct": 10,
-        "temp_max_f": 91.2,
-        "temp_min_f": 69.7,
-        "wind_max_mph": 10.3,
-        "wind_gust_max_mph": 20.8,
+        "precip_prob_pct": 1,
+        "temp_max_f": 91.7,
+        "temp_min_f": 70.6,
+        "wind_max_mph": 9.4,
+        "wind_gust_max_mph": 16.8,
         "frost": false,
         "freeze": false
       },
       {
         "date": "2026-07-18",
         "precip_type": "rain",
-        "precip_in": 0.63,
-        "precip_prob_pct": 82,
-        "temp_max_f": 79.1,
-        "temp_min_f": 68.9,
-        "wind_max_mph": 11.8,
-        "wind_gust_max_mph": 18.3,
+        "precip_in": 0.14,
+        "precip_prob_pct": 90,
+        "temp_max_f": 92.6,
+        "temp_min_f": 72.8,
+        "wind_max_mph": 9.9,
+        "wind_gust_max_mph": 17.7,
         "frost": false,
         "freeze": false
       }
     ],
-    "precip_total_in": 0.63,
+    "precip_total_in": 0.14,
     "any_frost": false,
     "any_freeze": false,
-    "max_wind_gust_mph": 20.8,
-    "narrative": "3-day outlook: 0.63 in rain expected, gusts to 21 mph."
+    "max_wind_gust_mph": 17.7,
+    "narrative": "3-day outlook: 0.14 in rain expected, gusts to 18 mph."
   },
   "wind_today": {
     "source": "Open-Meteo",
@@ -373,35 +375,56 @@
     "periods": [
       {
         "period": "morning",
-        "from_deg": 309,
-        "from_compass": "NW",
+        "from_deg": 300,
+        "from_compass": "WNW",
         "from_word": "northwest",
-        "avg_speed_mph": 6.1,
-        "max_gust_mph": 19.7
+        "avg_speed_mph": 4.9,
+        "max_gust_mph": 13.9
       },
       {
         "period": "afternoon",
-        "from_deg": 267,
+        "from_deg": 263,
         "from_compass": "W",
         "from_word": "west",
-        "avg_speed_mph": 9.3,
-        "max_gust_mph": 17.7
+        "avg_speed_mph": 8.9,
+        "max_gust_mph": 14.5
       },
       {
         "period": "evening",
-        "from_deg": 283,
+        "from_deg": 289,
         "from_compass": "WNW",
         "from_word": "west",
-        "avg_speed_mph": 8.2,
-        "max_gust_mph": 15.9
+        "avg_speed_mph": 7.1,
+        "max_gust_mph": 16.1
       }
     ],
-    "narrative": "Winds from the northwest around 6 mph this morning, shifting to the west around 9 mph in the afternoon, staying out of the west around 8 mph in the evening."
+    "narrative": "Winds from the northwest around 5 mph this morning, shifting to the west around 9 mph in the afternoon, staying out of the west around 7 mph in the evening."
   },
   "nws_alerts": {
     "source": "api.weather.gov",
-    "active_count": 1,
+    "active_count": 4,
     "alerts": [
+      {
+        "event": "Air Quality Alert",
+        "severity": "Unknown",
+        "headline": "Air Quality Alert issued July 16 at 5:10PM EDT by NWS Baltimore MD/Washington DC",
+        "onset": "2026-07-16T17:10:00-04:00",
+        "ends": null
+      },
+      {
+        "event": "Air Quality Alert",
+        "severity": "Unknown",
+        "headline": "Air Quality Alert issued July 16 at 4:40PM EDT by NWS Baltimore MD/Washington DC",
+        "onset": "2026-07-16T16:40:00-04:00",
+        "ends": null
+      },
+      {
+        "event": "Heat Advisory",
+        "severity": "Moderate",
+        "headline": "Heat Advisory issued July 16 at 12:12PM EDT until July 16 at 8:00PM EDT by NWS Baltimore MD/Washington DC",
+        "onset": "2026-07-16T12:12:00-04:00",
+        "ends": "2026-07-16T20:00:00-04:00"
+      },
       {
         "event": "Air Quality Alert",
         "severity": "Unknown",
@@ -416,24 +439,24 @@
   "uv_index": {
     "source": "currentuvindex.com",
     "timezone": "America/New_York",
-    "current_uvi": 0.3,
-    "above_3_time_et": "10:00 AM",
-    "below_3_time_et": "5:00 PM",
-    "peak_uvi": 8.5,
-    "peak_time_et": "1:00 PM",
-    "sanity_check_passed": true
+    "current_uvi": 1.3,
+    "above_3_time_et": null,
+    "below_3_time_et": null,
+    "peak_uvi": 0.4,
+    "peak_time_et": "7:00 PM",
+    "sanity_check_passed": null
   },
   "drought_status": {
     "source": "US Drought Monitor",
     "county": "Montgomery County MD",
     "fips": "24031",
-    "week_ending": "2026-07-13",
+    "week_ending": "2026-07-20",
     "d0_pct": 100.0,
     "d1_pct": 100.0,
-    "d2_pct": 7.44,
+    "d2_pct": 5.03,
     "d3_pct": 0.0,
     "d4_pct": 0.0,
-    "status_summary": "7% of county in Severe (D2) or worse.",
+    "status_summary": "5% of county in Severe (D2) or worse.",
     "carried_forward": false
   }
 }
