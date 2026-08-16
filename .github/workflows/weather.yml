@@ -95,7 +95,7 @@ jobs:
 
       - name: Commit updated weather files
         run: |
-          git config user.name "rdbf-weather-bot"
+          git config user.name "rdbf-bot"
           git config user.email "actions@users.noreply.github.com"
 
           # weather_summary.json  = snapshot (newest wins).
