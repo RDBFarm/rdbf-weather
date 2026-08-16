@@ -1,4 +1,4 @@
-# RDBF Weather Pre-Processor — One-Time Setup (~10 minutes)
+# RDBF — Weather Pre-Processor Setup (~10 minutes)
 
 After this setup, the weather stack runs itself twice a day (5:35 AM and 5:35 PM
 Eastern) and your debrief Shortcut fetches ONE url instead of five.

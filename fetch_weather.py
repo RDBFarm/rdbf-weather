@@ -37,7 +37,7 @@ FIPS = "24031"  # Montgomery County, MD
 TZ = ZoneInfo("America/New_York")
 OUTPUT_FILE = "weather_summary.json"
 HISTORY_FILE = "weather_history.csv"
-USER_AGENT = "RDBF-weather-preprocessor (github.com/rdbfarm)"
+USER_AGENT = "RDBF-preprocessor (github.com/rdbfarm)"
 
 WU_API_KEY = os.environ.get("WU_API_KEY", "").strip()
 

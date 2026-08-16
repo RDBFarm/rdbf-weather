@@ -1,9 +1,13 @@
-# RDBF Weather Pre-Processor
+# RDBF
 
-Automated weather data pipeline for Red Devil Bison Farm (Poolesville, MD).
-Runs on GitHub Actions twice a day, aggregates five free weather sources into
-a single file the farm debrief can read with one request, and keeps a permanent
-daily history.
+Automated data systems for **Red Devil Bison Farm** (Poolesville, MD).
+
+This repository is the home for RDBF's farm automation. Its first component is
+the **Weather Pre-Processor** — a pipeline that runs on GitHub Actions twice a
+day, aggregates five free weather sources into a single file the farm debrief
+can read with one request, and keeps a permanent daily history. More components
+will live alongside it as the system grows; everything documented below covers
+the Weather Pre-Processor.
 
 ---
 
