@@ -203,8 +203,8 @@ def get_open_meteo():
     url = ("https://api.open-meteo.com/v1/forecast"
            f"?latitude={LAT}&longitude={LON}"
            "&hourly=soil_temperature_0cm,soil_temperature_6cm,snowfall,snow_depth,weathercode,rain,"
-           "windspeed_10m,winddirection_10m,windgusts_10m"
-           "&daily=weathercode,snowfall_sum,rain_sum,precipitation_sum,"
+           "windspeed_10m,winddirection_10m,windgusts_10m,uv_index"
+           "&daily=weathercode,snowfall_sum,rain_sum,precipitation_sum,uv_index_max,"
            "precipitation_probability_max,sunrise,sunset,"
            "temperature_2m_max,temperature_2m_min,"
            "windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant"
@@ -406,53 +406,129 @@ def get_nws_alerts():
 
 
 # ── 4. UV Index (UTC -> ET conversion + sanity check) ────────────────────────
-def get_uv(sunrise_iso, sunset_iso):
-    out = {"source": "currentuvindex.com", "timezone": "America/New_York",
+def _uv3_crossings(points, threshold=3.0):
+    """Times UV rises through and falls back below `threshold`, interpolated.
+
+    Readings are hourly, so the raw series only says "UV was >= 3 at 4 PM and
+    2.9 at 5 PM" — reporting 4 PM as the falling crossing is up to an hour
+    early, in the direction that under-warns. Straight-line interpolation
+    between the two bracketing readings puts the crossing within a few minutes.
+    Returns (rise, fall) as datetimes; either may be a series endpoint if UV
+    was already past the threshold when the day's readings begin or end.
+    """
+    def at(p0, p1):
+        (t0, u0), (t1, u1) = p0, p1
+        if u1 == u0:
+            return t0
+        return t0 + (t1 - t0) * ((threshold - u0) / (u1 - u0))
+
+    rise = fall = None
+    for i in range(len(points) - 1):
+        u0, u1 = points[i][1], points[i + 1][1]
+        if u0 < threshold <= u1 and rise is None:
+            rise = at(points[i], points[i + 1])
+        if u0 >= threshold > u1:
+            fall = at(points[i], points[i + 1])
+
+    above = [t for t, u in points if u >= threshold]
+    if rise is None:                 # already above at the first reading
+        rise = min(above)
+    if fall is None:                 # still above at the last reading
+        fall = max(above)
+    return rise, fall
+
+
+def get_uv(sunrise_iso, sunset_iso, om):
+    """Daily UV peak and the times UV crosses 3, plus the current reading.
+
+    The peak and crossings come from Open-Meteo's hourly uv_index, which covers
+    the WHOLE calendar day (the request carries past_days, so morning hours are
+    present even on an evening run). currentuvindex.com is a forecast: its array
+    starts at the current hour, so on the 5:35 PM run the real ~1 PM peak has
+    already fallen out of it and the max of what remains is a couple of evening
+    hours near zero. Reading the peak from there understated every archived day.
+    It is still the better source for "right now", so that is all it is used for.
+    """
+    out = {"source": "open-meteo (daily peak + crossings), currentuvindex.com (current)",
+           "timezone": "America/New_York",
            "current_uvi": None, "above_3_time_et": None, "below_3_time_et": None,
-           "peak_uvi": None, "peak_time_et": None, "sanity_check_passed": None}
-    data = fetch_json(f"https://currentuvindex.com/api/v1/uvi?latitude={LAT}&longitude={LON}")
-    if not data:
+           "peak_uvi": None, "peak_time_et": None, "peak_source": None,
+           "sanity_check_passed": None}
+
+    now_local = datetime.now(TZ)
+    today_local = now_local.date()
+
+    # ── current reading: currentuvindex.com, falling back to Open-Meteo's hour ──
+    live = fetch_json(f"https://currentuvindex.com/api/v1/uvi?latitude={LAT}&longitude={LON}")
+    if live:
+        out["current_uvi"] = (live.get("now") or {}).get("uvi")
+    else:
+        errors.append("currentuvindex.com unavailable — current UV from Open-Meteo hourly")
+
+    # ── full-day hourly series from Open-Meteo ──────────────────────────────────
+    above = []
+    try:
+        hourly = (om or {}).get("hourly") or {}
+        times, uvs = hourly.get("time") or [], hourly.get("uv_index") or []
+        today_pts = []
+        for t_str, u in zip(times, uvs):
+            t = datetime.fromisoformat(t_str).replace(tzinfo=TZ)
+            if t.date() == today_local and u is not None:
+                today_pts.append((t, u))
+
+        if today_pts:
+            peak_t, peak_u = max(today_pts, key=lambda x: x[1])
+            out["peak_uvi"] = peak_u
+            out["peak_time_et"] = peak_t.strftime("%-I:%M %p")
+            out["peak_source"] = "open-meteo hourly uv_index"
+
+            above = [t for t, u in today_pts if u >= 3]
+            if above:
+                rise, fall = _uv3_crossings(today_pts)
+                out["above_3_time_et"] = rise.strftime("%-I:%M %p")
+                out["below_3_time_et"] = fall.strftime("%-I:%M %p")
+                out["crossing_precision"] = (
+                    "interpolated between hourly readings; exact to a few minutes")
+
+            if out["current_uvi"] is None:
+                cur = [(t, u) for t, u in today_pts if t <= now_local]
+                if cur:
+                    out["current_uvi"] = max(cur, key=lambda x: x[0])[1]
+
+        # Open-Meteo's own daily maximum is the authority on the peak VALUE;
+        # the hourly series only supplies the time it occurred.
+        daily = (om or {}).get("daily") or {}
+        for i, d_str in enumerate(daily.get("time") or []):
+            if d_str == today_local.isoformat():
+                dmax = (daily.get("uv_index_max") or [None])[i]
+                if dmax is not None:
+                    if out["peak_uvi"] is None or dmax > out["peak_uvi"]:
+                        out["peak_uvi"] = dmax
+                        out["peak_source"] = "open-meteo daily uv_index_max"
+                break
+
+        if out["peak_uvi"] is None:
+            errors.append("UV peak unavailable — Open-Meteo returned no uv_index for today")
+    except Exception as e:
+        errors.append(f"UV parse error: {type(e).__name__}: {e}")
         return out
 
+    # Sanity check against physical reality: UV crossings must fall between
+    # sunrise and sunset. If they don't, the data is wrong — null it out.
     try:
-        now_block = data.get("now") or {}
-        out["current_uvi"] = now_block.get("uvi")
-
-        today_local = datetime.now(TZ).date()
-        points = []
-        for item in (data.get("forecast") or []):
-            t_utc = datetime.fromisoformat(item["time"].replace("Z", "+00:00"))
-            t_local = t_utc.astimezone(TZ)
-            if t_local.date() == today_local:
-                points.append((t_local, item.get("uvi")))
-
-        if points:
-            valid = [(t, u) for t, u in points if u is not None]
-            if valid:
-                peak_t, peak_u = max(valid, key=lambda x: x[1])
-                out["peak_uvi"], out["peak_time_et"] = peak_u, peak_t.strftime("%-I:%M %p")
-                above = [t for t, u in valid if u >= 3]
-                if above:
-                    out["above_3_time_et"] = min(above).strftime("%-I:%M %p")
-                    out["below_3_time_et"] = max(above).strftime("%-I:%M %p")
-
-        # Sanity check against physical reality: UV crossings must fall between
-        # sunrise and sunset. If they don't, the data is wrong — null it out.
-        if sunrise_iso and sunset_iso and out["above_3_time_et"]:
+        if sunrise_iso and sunset_iso and above:
             sunrise = datetime.fromisoformat(sunrise_iso).replace(tzinfo=TZ)
             sunset = datetime.fromisoformat(sunset_iso).replace(tzinfo=TZ)
-            first_above = min(above)
-            last_above = max(above)
-            ok = (sunrise <= first_above <= sunset) and (sunrise <= last_above <= sunset)
+            ok = (sunrise <= min(above) <= sunset) and (sunrise <= max(above) <= sunset)
             out["sanity_check_passed"] = ok
             if not ok:
                 errors.append("UV crossing times failed sunrise/sunset sanity check — nulled")
                 out["above_3_time_et"] = out["below_3_time_et"] = None
                 out["peak_time_et"] = None
-        elif out["above_3_time_et"]:
+        elif above:
             out["sanity_check_passed"] = None  # couldn't verify — do not claim it passed
     except Exception as e:
-        errors.append(f"UV parse error: {type(e).__name__}: {e}")
+        errors.append(f"UV sanity check error: {type(e).__name__}: {e}")
     return out
 
 
@@ -596,6 +672,18 @@ def archive_history(summary):
         pass
     except Exception as e:
         errors.append(f"weather_history.csv read error: {type(e).__name__}: {e}")
+
+    # uv_peak is a daily MAXIMUM, so a later run must never lower it. Belt and
+    # braces behind the Open-Meteo fix: if today's row already holds a higher
+    # peak, that one stands.
+    prior = existing.get(today) or {}
+    try:
+        prior_peak = float(prior.get("uv_peak"))
+        new_peak = float(row["uv_peak"]) if row["uv_peak"] is not None else None
+        if new_peak is None or prior_peak > new_peak:
+            row["uv_peak"] = prior_peak
+    except (TypeError, ValueError):
+        pass  # no usable prior value — take this run's
 
     existing[today] = {k: ("" if row[k] is None else row[k]) for k in HISTORY_COLUMNS}
 
@@ -755,7 +843,7 @@ def main():
     else:
         errors.append("Open-Meteo unavailable — soil temps and forecast are null")
 
-    uv = get_uv(sunrise_iso, sunset_iso)
+    uv = get_uv(sunrise_iso, sunset_iso, om)
     drought = get_drought(previous)
 
     # Precipitation block per RDBF source-selection rules
