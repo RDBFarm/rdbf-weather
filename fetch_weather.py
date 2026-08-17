@@ -406,6 +406,38 @@ def get_nws_alerts():
 
 
 # ── 4. UV Index (UTC -> ET conversion + sanity check) ────────────────────────
+def _uv3_crossings(points, threshold=3.0):
+    """Times UV rises through and falls back below `threshold`, interpolated.
+
+    Readings are hourly, so the raw series only says "UV was >= 3 at 4 PM and
+    2.9 at 5 PM" — reporting 4 PM as the falling crossing is up to an hour
+    early, in the direction that under-warns. Straight-line interpolation
+    between the two bracketing readings puts the crossing within a few minutes.
+    Returns (rise, fall) as datetimes; either may be a series endpoint if UV
+    was already past the threshold when the day's readings begin or end.
+    """
+    def at(p0, p1):
+        (t0, u0), (t1, u1) = p0, p1
+        if u1 == u0:
+            return t0
+        return t0 + (t1 - t0) * ((threshold - u0) / (u1 - u0))
+
+    rise = fall = None
+    for i in range(len(points) - 1):
+        u0, u1 = points[i][1], points[i + 1][1]
+        if u0 < threshold <= u1 and rise is None:
+            rise = at(points[i], points[i + 1])
+        if u0 >= threshold > u1:
+            fall = at(points[i], points[i + 1])
+
+    above = [t for t, u in points if u >= threshold]
+    if rise is None:                 # already above at the first reading
+        rise = min(above)
+    if fall is None:                 # still above at the last reading
+        fall = max(above)
+    return rise, fall
+
+
 def get_uv(sunrise_iso, sunset_iso, om):
     """Daily UV peak and the times UV crosses 3, plus the current reading.
 
@@ -452,8 +484,11 @@ def get_uv(sunrise_iso, sunset_iso, om):
 
             above = [t for t, u in today_pts if u >= 3]
             if above:
-                out["above_3_time_et"] = min(above).strftime("%-I:%M %p")
-                out["below_3_time_et"] = max(above).strftime("%-I:%M %p")
+                rise, fall = _uv3_crossings(today_pts)
+                out["above_3_time_et"] = rise.strftime("%-I:%M %p")
+                out["below_3_time_et"] = fall.strftime("%-I:%M %p")
+                out["crossing_precision"] = (
+                    "interpolated between hourly readings; exact to a few minutes")
 
             if out["current_uvi"] is None:
                 cur = [(t, u) for t, u in today_pts if t <= now_local]
