@@ -673,17 +673,32 @@ def archive_history(summary):
     except Exception as e:
         errors.append(f"weather_history.csv read error: {type(e).__name__}: {e}")
 
-    # uv_peak is a daily MAXIMUM, so a later run must never lower it. Belt and
-    # braces behind the Open-Meteo fix: if today's row already holds a higher
-    # peak, that one stands.
+    # uv_peak is a daily maximum, and a later run may legitimately revise it in
+    # EITHER direction: the morning value is a forecast, the evening one is
+    # closer to what the day actually did. Always keeping the higher of the two
+    # would bias the archive toward forecasts. The only drop worth refusing is
+    # the collapse signature of the old peak-window bug, where a run reported a
+    # small fraction of the real peak (0.9 against a true 8). A real revision
+    # does not halve the day's peak, so that is where the line sits. The floor
+    # keeps the rule off genuinely low-UV winter days, where small absolute
+    # differences cross the ratio without meaning anything.
+    COLLAPSE_RATIO, GUARD_FLOOR = 0.5, 2.0
     prior = existing.get(today) or {}
     try:
         prior_peak = float(prior.get("uv_peak"))
-        new_peak = float(row["uv_peak"]) if row["uv_peak"] is not None else None
-        if new_peak is None or prior_peak > new_peak:
-            row["uv_peak"] = prior_peak
     except (TypeError, ValueError):
-        pass  # no usable prior value — take this run's
+        prior_peak = None
+
+    if prior_peak is not None:
+        if row["uv_peak"] is None:
+            row["uv_peak"] = prior_peak          # this run has nothing; keep what we had
+        elif (prior_peak >= GUARD_FLOOR
+              and float(row["uv_peak"]) < prior_peak * COLLAPSE_RATIO):
+            errors.append(
+                f"uv_peak {row['uv_peak']} is under half the {prior_peak} already "
+                f"recorded for {today} — keeping {prior_peak}; that drop is the "
+                "signature of a truncated read, not a revision")
+            row["uv_peak"] = prior_peak
 
     existing[today] = {k: ("" if row[k] is None else row[k]) for k in HISTORY_COLUMNS}
 
