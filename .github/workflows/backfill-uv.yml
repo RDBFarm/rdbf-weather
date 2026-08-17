@@ -1,0 +1,65 @@
+name: Backfill UV peaks
+
+# Manual only — this repairs historical uv_peak values and is not something to
+# run on a schedule. Trigger from Actions -> Backfill UV peaks -> Run workflow.
+# Leave "write" as false first to see the changes in the job log before applying.
+on:
+  workflow_dispatch:
+    inputs:
+      write:
+        description: "Apply the changes (false = dry run, just print them)"
+        type: boolean
+        default: false
+
+# Share the weather job's lock so a backfill can never collide with a
+# scheduled run rewriting the same file.
+concurrency:
+  group: weather-writer
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  backfill-uv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Backfill uv_peak from Open-Meteo
+        run: |
+          python backfill_uv.py ${{ inputs.write && '--write' || '' }} \
+            | tee "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit repaired history
+        if: ${{ inputs.write }}
+        run: |
+          git config user.name "rdbf-bot"
+          git config user.email "actions@users.noreply.github.com"
+
+          if git diff --quiet -- weather_history.csv; then
+            echo "No change to weather_history.csv — nothing to commit."
+            exit 0
+          fi
+
+          git add weather_history.csv
+          git commit -m "Backfill uv_peak from Open-Meteo daily uv_index_max"
+
+          # Match the weather job's collision handling: if the scheduled run
+          # pushed while we were working, rebase onto it and try again.
+          for i in 1 2 3; do
+            if git push; then
+              echo "Pushed."
+              exit 0
+            fi
+            echo "Push rejected; syncing to remote and retrying ($i/3)."
+            git pull --rebase origin main || exit 1
+          done
+          echo "Could not push after 3 attempts."
+          exit 1
