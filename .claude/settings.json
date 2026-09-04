@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "TZ=America/New_York date \"+{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"Current farm-local date and time: %A, %B %-d, %Y at %-I:%M %p %Z\\\"}}\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
