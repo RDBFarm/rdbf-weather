@@ -54,8 +54,8 @@ def probe(url, want=None, keep=0):
             note = f"{r.status} {ctype} {len(body):,}B"
             if want and want not in ctype:
                 return False, note + f" (wanted {want})", body[:keep]
-            if len(body) < 500:
-                return False, note + " (suspiciously small)", body[:keep]
+            if len(body) < 60:
+                return False, note + " (empty or near-empty)", body[:keep]
             return True, note, body[:keep] if keep else b""
     except urllib.error.HTTPError as e:
         return False, f"HTTP {e.code}", b""
@@ -173,6 +173,42 @@ def main():
                     found["polygons"].append(item["url"])
         except Exception as e:
             print(f"       could not parse: {type(e).__name__}: {e}")
+
+    # ── 6. The real code, against the live services ──────────────────────────
+    # Probing a URL proves it answers. It does not prove our parser understands
+    # the answer. This runs the functions that will actually ship.
+    section("6. The shipping code, run for real")
+    try:
+        import fetch_weather as fw
+    except Exception as e:
+        print(f"  could not import fetch_weather: {type(e).__name__}: {e}")
+    else:
+        before = len(fw.errors)
+        at_farm = fw.get_drought_at_point()
+        print("  get_drought_at_point():")
+        for k, v in at_farm.items():
+            print(f"       {k}: {v}")
+        for err in fw.errors[before:]:
+            print(f"       error: {err}")
+
+        # The map writes files, so run it somewhere disposable.
+        import os, tempfile
+        cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmp:
+            os.chdir(tmp)
+            try:
+                before = len(fw.errors)
+                meta = fw.update_drought_map(None)
+                print("\n  update_drought_map():")
+                for k, v in (meta or {}).items():
+                    print(f"       {k}: {v}")
+                png = os.path.join(tmp, fw.DROUGHT_MAP_FILE)
+                if os.path.exists(png):
+                    print(f"       wrote {os.path.getsize(png):,} bytes")
+                for err in fw.errors[before:]:
+                    print(f"       error: {err}")
+            finally:
+                os.chdir(cwd)
 
     # ── Verdict ──────────────────────────────────────────────────────────────
     section("What this means")

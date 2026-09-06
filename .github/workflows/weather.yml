@@ -108,6 +108,13 @@ jobs:
           # and no lost history.
           for attempt in 1 2 3 4 5; do
             git add weather_summary.json weather_history.csv
+            # The drought map only changes once a week, and does not exist at
+            # all before the first successful fetch. Naming it in the git add
+            # above would abort the step on an unmatched pathspec, so stage it
+            # only once it is there.
+            for f in drought_map_md.png drought_map_md.json; do
+              if [ -e "$f" ]; then git add "$f"; fi
+            done
             if git diff --cached --quiet; then
               echo "No weather changes to commit."
               exit 0
