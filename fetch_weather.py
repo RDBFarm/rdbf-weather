@@ -419,6 +419,38 @@ def get_nws_alerts():
 
 
 # ── 4. UV Index (UTC -> ET conversion + sanity check) ────────────────────────
+def _uv_peak_time(points):
+    """The time of the day's UV peak, interpolated between hourly readings.
+
+    The raw series can only name an hour: "the largest reading was 2 PM". But
+    UV through midday is a smooth curve, and the true maximum almost never falls
+    exactly on the hour — reporting 2:00 PM implies a precision the data does
+    not have and is wrong by up to half an hour either way.
+
+    A parabola through the peak hour and its two neighbours has its vertex where
+    the curve turns. That is the standard reading of three samples around a
+    maximum and is the same move as interpolating the crossings, applied to a
+    turning point instead of a threshold.
+
+    Returns (time, index). Falls back to the sampled hour when the peak sits at
+    the end of the series or the three points are collinear, because a vertex
+    cannot be located from those.
+    """
+    if not points:
+        return None, None
+    i = max(range(len(points)), key=lambda k: points[k][1])
+    if i == 0 or i == len(points) - 1:
+        return points[i][0], i
+    y0, y1, y2 = points[i - 1][1], points[i][1], points[i + 1][1]
+    denom = y0 - 2 * y1 + y2
+    if denom == 0:
+        return points[i][0], i
+    offset = 0.5 * (y0 - y2) / denom          # in units of one sample interval
+    offset = max(-1.0, min(1.0, offset))      # never leave the bracketing hours
+    step = points[i + 1][0] - points[i][0]
+    return points[i][0] + step * offset, i
+
+
 def _uv3_crossings(points, threshold=3.0):
     """Times UV rises through and falls back below `threshold`, interpolated.
 
@@ -471,7 +503,9 @@ def get_uv(sunrise_iso, sunset_iso, om):
            # will next matter rather than when it stopped mattering. The hourly
            # series already spans several days; only today was ever read out of it.
            "tomorrow": {"date": None, "peak_uvi": None, "peak_time_et": None,
-                        "above_3_time_et": None, "below_3_time_et": None}}
+                        "peak_time_iso": None,
+                        "above_3_time_et": None, "below_3_time_et": None,
+                        "above_3_iso": None, "below_3_iso": None}}
 
     now_local = datetime.now(TZ)
     today_local = now_local.date()
@@ -495,16 +529,23 @@ def get_uv(sunrise_iso, sunset_iso, om):
                 today_pts.append((t, u))
 
         if today_pts:
-            peak_t, peak_u = max(today_pts, key=lambda x: x[1])
-            out["peak_uvi"] = peak_u
+            peak_t, peak_i = _uv_peak_time(today_pts)
+            out["peak_uvi"] = today_pts[peak_i][1]
             out["peak_time_et"] = peak_t.strftime("%-I:%M %p")
+            out["peak_time_iso"] = peak_t.isoformat(timespec="minutes")
             out["peak_source"] = "open-meteo hourly uv_index"
+            out["peak_time_precision"] = (
+                "vertex of a parabola through the peak hour and its neighbours; "
+                "the VALUE is the sampled or daily maximum, only the TIME is "
+                "interpolated")
 
             above = [t for t, u in today_pts if u >= 3]
             if above:
                 rise, fall = _uv3_crossings(today_pts)
                 out["above_3_time_et"] = rise.strftime("%-I:%M %p")
                 out["below_3_time_et"] = fall.strftime("%-I:%M %p")
+                out["above_3_iso"] = rise.isoformat(timespec="minutes")
+                out["below_3_iso"] = fall.isoformat(timespec="minutes")
                 out["crossing_precision"] = (
                     "interpolated between hourly readings; exact to a few minutes")
 
@@ -532,14 +573,17 @@ def get_uv(sunrise_iso, sunset_iso, om):
             if t.date() == tomorrow_local and u is not None:
                 tom_pts.append((t, u))
         if tom_pts:
-            tp, tu = max(tom_pts, key=lambda x: x[1])
+            tp, ti = _uv_peak_time(tom_pts)
             out["tomorrow"]["date"] = tomorrow_local.isoformat()
-            out["tomorrow"]["peak_uvi"] = tu
+            out["tomorrow"]["peak_uvi"] = tom_pts[ti][1]
             out["tomorrow"]["peak_time_et"] = tp.strftime("%-I:%M %p")
+            out["tomorrow"]["peak_time_iso"] = tp.isoformat(timespec="minutes")
             if any(u >= 3 for _, u in tom_pts):
                 rise, fall = _uv3_crossings(tom_pts)
                 out["tomorrow"]["above_3_time_et"] = rise.strftime("%-I:%M %p")
                 out["tomorrow"]["below_3_time_et"] = fall.strftime("%-I:%M %p")
+                out["tomorrow"]["above_3_iso"] = rise.isoformat(timespec="minutes")
+                out["tomorrow"]["below_3_iso"] = fall.isoformat(timespec="minutes")
         for i, d_str in enumerate((om or {}).get("daily", {}).get("time") or []):
             if d_str == tomorrow_local.isoformat():
                 dmax = ((om or {}).get("daily", {}).get("uv_index_max") or [None])[i]
