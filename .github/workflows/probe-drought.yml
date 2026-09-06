@@ -1,0 +1,35 @@
+name: Probe drought sources
+
+# Asks the US Drought Monitor what it will actually serve, and prints a report.
+# Reads nothing from this repository and writes nothing back — it only makes
+# HTTP requests and summarises what came back.
+#
+# It exists because the development container's network policy blocks
+# droughtmonitor.unl.edu, so candidate URLs cannot be checked there. This runner
+# can reach it. Run it once, read the summary, then decide whether the county
+# percentage chart should be replaced with a real map or a point query.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Ask the Drought Monitor what it serves
+        run: |
+          {
+            echo '## Drought source probe'
+            echo
+            echo '```'
+            python3 probe_drought_sources.py 2>&1
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
