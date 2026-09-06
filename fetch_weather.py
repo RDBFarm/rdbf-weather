@@ -25,9 +25,11 @@ import json
 import math
 import os
 import sys
+import urllib.parse
 import urllib.request
 import urllib.error
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 # ── Constants ────────────────────────────────────────────────────────────────
@@ -61,6 +63,17 @@ def fetch_text(url, headers=None, timeout=30):
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return resp.read().decode("utf-8")
+    except Exception as e:
+        errors.append(f"{url.split('?')[0]} -> {type(e).__name__}: {e}")
+        return None
+
+
+def fetch_bytes(url, timeout=60):
+    """GET a URL, return raw bytes or None (never raises). For images."""
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.read()
     except Exception as e:
         errors.append(f"{url.split('?')[0]} -> {type(e).__name__}: {e}")
         return None
@@ -533,6 +546,180 @@ def get_uv(sunrise_iso, sunset_iso, om):
 
 
 # ── 5. US Drought Monitor (Thursdays only; otherwise carry forward) ─────────
+# The county percentages answer "how much of Montgomery County is in drought".
+# The farm needs "is this ground in drought", which is a different question and
+# a better one. The USDM polygons answer it: query them at the farm's own
+# coordinates and the answer is one category, not a county average.
+#
+# Both of these services were confirmed reachable by probe_drought_sources.py.
+# The first is the National Drought Mitigation Center's own layer; the second
+# is Esri's Living Atlas copy, kept as a fallback because the two are unlikely
+# to fail together.
+DROUGHT_POINT_SERVICES = [
+    ("NDMC USDM current",
+     "https://services5.arcgis.com/0OTVzJS4K09zlixn/arcgis/rest/services/USDM_current/FeatureServer/0/query"),
+    ("Esri Living Atlas drought intensity",
+     "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/US_Drought_Intensity_v1/FeatureServer/3/query"),
+]
+
+DROUGHT_LABELS = {
+    0: "Abnormally Dry (D0)",
+    1: "Moderate Drought (D1)",
+    2: "Severe Drought (D2)",
+    3: "Extreme Drought (D3)",
+    4: "Exceptional Drought (D4)",
+}
+
+
+def _dm_value(attrs):
+    """Pull the drought class out of an attribute bag without guessing wildly.
+
+    The two services do not name the field identically, and neither promises
+    to keep the name forever, so match on the name rather than on position.
+    An unrecognised bag returns None — which reads as "not known", not as
+    "no drought". Those are different facts and SPEC 2.2 forbids conflating
+    them.
+    """
+    for key in ("dm", "DM", "drought_class", "gridcode", "GRIDCODE"):
+        if key in attrs and attrs[key] is not None:
+            try:
+                v = int(attrs[key])
+            except (TypeError, ValueError):
+                continue
+            if 0 <= v <= 4:
+                return v
+    return None
+
+
+def get_drought_at_point():
+    """The drought class covering the farm itself, or None if nothing covers it.
+
+    A point outside every polygon is a real answer: no drought here. That is
+    reported as category None with in_drought False, and is not the same as a
+    failed lookup, which reports available False.
+    """
+    out = {"available": False, "category": None, "label": None,
+           "in_drought": None, "source": None, "lat": LAT, "lon": LON}
+
+    params = urllib.parse.urlencode({
+        "geometry": f"{LON},{LAT}",
+        "geometryType": "esriGeometryPoint",
+        "inSR": "4326",
+        "spatialRel": "esriSpatialRelIntersects",
+        "outFields": "*",
+        "returnGeometry": "false",
+        "f": "json",
+    })
+
+    for name, base in DROUGHT_POINT_SERVICES:
+        data = fetch_json(f"{base}?{params}")
+        if not data or "error" in data:
+            continue
+        features = data.get("features")
+        if features is None:
+            continue
+
+        out["available"] = True
+        out["source"] = name
+
+        # Polygons nest: a point in D2 also sits inside D1 and D0. The worst
+        # class that covers the point is the one that describes it.
+        classes = [c for c in (_dm_value(f.get("attributes") or {}) for f in features)
+                   if c is not None]
+        if not features:
+            out["in_drought"] = False
+            out["label"] = "No drought or abnormal dryness at the farm"
+            return out
+        if not classes:
+            # Something came back but nothing recognisable in it. Say so rather
+            # than reporting the absence of a class as the absence of drought.
+            out["available"] = False
+            out["source"] = None
+            errors.append(f"Drought point query ({name}): no drought class field in response")
+            continue
+
+        worst = max(classes)
+        out["category"] = f"D{worst}"
+        out["label"] = DROUGHT_LABELS[worst]
+        out["in_drought"] = True
+        return out
+
+    if not out["available"]:
+        errors.append("Drought point query: no service returned a usable answer")
+    return out
+
+
+# The published Maryland map, so the farm's corner of the county can be looked
+# at rather than averaged into a percentage. Confirmed reachable by
+# probe_drought_sources.py.
+DROUGHT_MAP_URL = "https://droughtmonitor.unl.edu/data/png/{d}/{d}_MD_trd.png"
+DROUGHT_MAP_FILE = "drought_map_md.png"
+DROUGHT_MAP_META = "drought_map_md.json"
+DROUGHT_MAP_CREDIT = ("U.S. Drought Monitor, a joint product of the National Drought "
+                      "Mitigation Center at UNL, USDA and NOAA")
+
+
+def update_drought_map(week_ending):
+    """Keep a local copy of the current Maryland map. Returns its metadata.
+
+    The map changes once a week, so this downloads only when the map date
+    moves. Twice-daily runs otherwise touch nothing, which keeps a binary file
+    out of all but one commit a week.
+    """
+    meta_path = Path(DROUGHT_MAP_META)
+    try:
+        have = json.loads(meta_path.read_text())
+    except Exception:
+        have = {}
+
+    # The USDM names its files by the map's valid date, a Tuesday. The county
+    # API reports the week ending, six days later. Derive the one from the
+    # other rather than keeping two schedules in step by hand.
+    dates = []
+    if week_ending:
+        try:
+            d = datetime.strptime(week_ending[:10], "%Y-%m-%d").date() - timedelta(days=6)
+            dates.append(d)
+        except ValueError:
+            pass
+    if not dates:
+        d = datetime.now(TZ).date()
+        d -= timedelta(days=(d.weekday() - 1) % 7)      # back to Tuesday
+        dates.append(d)
+    # Thursday morning the new map may not be published yet. Fall back a week
+    # rather than leaving the farm with no map at all.
+    dates.append(dates[0] - timedelta(days=7))
+
+    for d in dates:
+        stamp = d.strftime("%Y%m%d")
+        if have.get("map_date") == stamp and Path(DROUGHT_MAP_FILE).exists():
+            return have                                  # already current
+
+        blob = fetch_bytes(DROUGHT_MAP_URL.format(d=stamp))
+        if not blob or not blob.startswith(b"\x89PNG"):
+            continue
+
+        meta = {
+            "map_date": stamp,
+            "valid": d.isoformat(),
+            "file": DROUGHT_MAP_FILE,
+            "source_url": DROUGHT_MAP_URL.format(d=stamp),
+            "credit": DROUGHT_MAP_CREDIT,
+            "fetched_et": datetime.now(TZ).isoformat(timespec="seconds"),
+        }
+        try:
+            Path(DROUGHT_MAP_FILE).write_bytes(blob)
+            meta_path.write_text(json.dumps(meta, indent=2) + "\n")
+            print(f"Drought map updated to {d.isoformat()} ({len(blob):,} bytes)")
+            return meta
+        except Exception as e:
+            errors.append(f"Drought map write error: {type(e).__name__}: {e}")
+            return have
+
+    errors.append("Drought map: no published map found for the current or previous week")
+    return have
+
+
 def get_drought(previous):
     today = datetime.now(TZ)
     is_thursday = today.weekday() == 3
@@ -614,7 +801,7 @@ HISTORY_COLUMNS = [
     "date", "temp_f", "humidity_pct", "precip_today_in",
     "soil_0cm_f", "soil_6cm_f", "soil_trend_7day",
     "precip_type_today", "nws_active_alerts",
-    "uv_peak", "drought_week_ending",
+    "uv_peak", "drought_week_ending", "drought_at_farm",
     "drought_d0_pct", "drought_d1_pct", "drought_d2_pct",
     "drought_d3_pct", "drought_d4_pct",
     "yest_date", "yest_temp_high_f", "yest_temp_low_f",
@@ -648,6 +835,11 @@ def archive_history(summary):
         "nws_active_alerts": nws.get("active_count"),
         "uv_peak": uv.get("peak_uvi"),
         "drought_week_ending": dr.get("week_ending"),
+        # "D0".."D4" when a polygon covers the farm, "none" when the lookup
+        # succeeded and none did, blank when the lookup itself failed.
+        "drought_at_farm": (
+            (dr.get("at_farm") or {}).get("category")
+            or ("none" if (dr.get("at_farm") or {}).get("in_drought") is False else None)),
         "drought_d0_pct": dr.get("d0_pct"),
         "drought_d1_pct": dr.get("d1_pct"),
         "drought_d2_pct": dr.get("d2_pct"),
@@ -860,6 +1052,19 @@ def main():
 
     uv = get_uv(sunrise_iso, sunset_iso, om)
     drought = get_drought(previous)
+
+    # The county figure and the farm figure are kept side by side rather than
+    # one replacing the other. They answer different questions and can honestly
+    # disagree: the county can be 5% in D1 while the farm sits in the other 95%.
+    at_farm = get_drought_at_point()
+    drought["at_farm"] = at_farm
+    drought["map"] = update_drought_map(drought.get("week_ending"))
+    if at_farm.get("available"):
+        drought["at_farm_summary"] = (
+            at_farm["label"] if at_farm["in_drought"]
+            else "No drought or abnormal dryness at the farm.")
+    else:
+        drought["at_farm_summary"] = None
 
     # Precipitation block per RDBF source-selection rules
     precip = {
