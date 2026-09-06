@@ -88,11 +88,62 @@ def load_previous():
         return None
 
 
+# Dew point says what relative humidity cannot: how much water is actually in
+# the air. 60% humidity means something different at 55F and at 90F, which is
+# why "humid" cannot be read off the percentage alone. The bands below are the
+# conventional comfort scale, not this farm's invention — they ship with the
+# number so nobody has to remember which way they run, and so a reader can tell
+# a published convention from somebody's opinion.
+DEW_POINT_BANDS = [
+    (50, "dry"), (55, "very comfortable"), (60, "comfortable"),
+    (65, "noticeably humid"), (70, "humid"), (75, "oppressive"),
+]
+DEW_POINT_SCALE = {
+    "units": "F",
+    "source": "conventional dew-point comfort scale",
+    "bands": ["<50 dry", "50-54 very comfortable", "55-59 comfortable",
+              "60-64 noticeably humid", "65-69 humid", "70-74 oppressive",
+              ">=75 extreme"],
+    "note": "Dew point, not relative humidity. 60% humidity is dry at 55F and "
+            "sodden at 90F; the percentage alone cannot say which.",
+}
+
+
+def dew_point_band(f):
+    """Plain-language band for a dew point in Fahrenheit, or None."""
+    if f is None:
+        return None
+    for edge, label in DEW_POINT_BANDS:
+        if f < edge:
+            return label
+    return "extreme"
+
+
+def dew_point_from(temp_f, rh_pct):
+    """Dew point from temperature and relative humidity, Magnus formula.
+
+    Only a fallback. The station reports dew point directly and that reading is
+    preferred — this exists so a missing field does not take the whole figure
+    with it.
+    """
+    if temp_f is None or rh_pct is None or rh_pct <= 0:
+        return None
+    try:
+        tc = (float(temp_f) - 32) * 5 / 9
+        a, b = 17.625, 243.04
+        g = math.log(float(rh_pct) / 100) + (a * tc) / (b + tc)
+        dc = (b * g) / (a - g)
+        return round(dc * 9 / 5 + 32, 1)
+    except (ValueError, ZeroDivisionError):
+        return None
+
+
 # ── 1. Weather Underground (current conditions + actual rain) ───────────────
 def get_wu():
     out = {
         "source": STATION_ID,
         "temp_f": None, "humidity_pct": None,
+        "dew_point_f": None, "dew_point_band": None, "dew_point_source": None,
         "wind_mph": None, "wind_dir_deg": None,
         "precip_today_in": None, "precip_rate_in_hr": None,
         "obs_time_local": None,
@@ -117,6 +168,14 @@ def get_wu():
             "precip_rate_in_hr": imp.get("precipRate"),
             "obs_time_local": obs.get("obsTimeLocal"),
         })
+        dp = imp.get("dewpt")
+        out["dew_point_source"] = "station"
+        if dp is None:
+            dp = dew_point_from(out["temp_f"], out["humidity_pct"])
+            out["dew_point_source"] = "derived from station temp and humidity"
+        out["dew_point_f"] = dp
+        out["dew_point_band"] = dew_point_band(dp)
+        out["dew_point_scale"] = DEW_POINT_SCALE
     except (KeyError, IndexError, TypeError) as e:
         errors.append(f"Weather Underground parse error: {e}")
     return out
@@ -216,7 +275,7 @@ def get_open_meteo():
     url = ("https://api.open-meteo.com/v1/forecast"
            f"?latitude={LAT}&longitude={LON}"
            "&hourly=soil_temperature_0cm,soil_temperature_6cm,snowfall,snow_depth,weathercode,rain,"
-           "windspeed_10m,winddirection_10m,windgusts_10m,uv_index,temperature_2m"
+           "windspeed_10m,winddirection_10m,windgusts_10m,uv_index,temperature_2m,dewpoint_2m"
            "&daily=weathercode,snowfall_sum,rain_sum,precipitation_sum,uv_index_max,"
            "precipitation_probability_max,sunrise,sunset,"
            "temperature_2m_max,temperature_2m_min,"
@@ -870,7 +929,7 @@ def get_drought(previous):
 
 # ── Daily archive ────────────────────────────────────────────────────────────
 HISTORY_COLUMNS = [
-    "date", "temp_f", "humidity_pct", "precip_today_in",
+    "date", "temp_f", "humidity_pct", "dew_point_f", "precip_today_in",
     "soil_0cm_f", "soil_6cm_f", "soil_trend_7day",
     "precip_type_today", "nws_active_alerts",
     "uv_peak", "drought_week_ending", "drought_at_farm",
@@ -899,6 +958,7 @@ def archive_history(summary):
         "date": today,
         "temp_f": cc.get("temp_f"),
         "humidity_pct": cc.get("humidity_pct"),
+        "dew_point_f": cc.get("dew_point_f"),
         "precip_today_in": cc.get("precip_today_in"),
         "soil_0cm_f": soil.get("surface_0cm_f"),
         "soil_6cm_f": soil.get("depth_6cm_f"),
@@ -997,6 +1057,7 @@ def build_hourly_ahead(om, now_local):
         times = hourly.get("time") or []
         temps = hourly.get("temperature_2m") or []
         uvs = hourly.get("uv_index") or []
+        dews = hourly.get("dewpoint_2m") or []
         end = (now_local.date() + timedelta(days=2))
         for i, t_str in enumerate(times):
             t = datetime.fromisoformat(t_str).replace(tzinfo=TZ)
@@ -1007,6 +1068,7 @@ def build_hourly_ahead(om, now_local):
                 "t": t.isoformat(timespec="minutes"),
                 "temp_f": temps[i] if i < len(temps) else None,
                 "uv": uvs[i] if i < len(uvs) else None,
+                "dew_f": dews[i] if i < len(dews) else None,
             })
         if not out["hours"]:
             errors.append("hourly_ahead: no forecast hours returned")
