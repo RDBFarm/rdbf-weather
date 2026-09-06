@@ -216,7 +216,7 @@ def get_open_meteo():
     url = ("https://api.open-meteo.com/v1/forecast"
            f"?latitude={LAT}&longitude={LON}"
            "&hourly=soil_temperature_0cm,soil_temperature_6cm,snowfall,snow_depth,weathercode,rain,"
-           "windspeed_10m,winddirection_10m,windgusts_10m,uv_index"
+           "windspeed_10m,winddirection_10m,windgusts_10m,uv_index,temperature_2m"
            "&daily=weathercode,snowfall_sum,rain_sum,precipitation_sum,uv_index_max,"
            "precipitation_probability_max,sunrise,sunset,"
            "temperature_2m_max,temperature_2m_min,"
@@ -466,7 +466,12 @@ def get_uv(sunrise_iso, sunset_iso, om):
            "timezone": "America/New_York",
            "current_uvi": None, "above_3_time_et": None, "below_3_time_et": None,
            "peak_uvi": None, "peak_time_et": None, "peak_source": None,
-           "sanity_check_passed": None}
+           "sanity_check_passed": None,
+           # Tomorrow, because a briefing read in the evening should say when UV
+           # will next matter rather than when it stopped mattering. The hourly
+           # series already spans several days; only today was ever read out of it.
+           "tomorrow": {"date": None, "peak_uvi": None, "peak_time_et": None,
+                        "above_3_time_et": None, "below_3_time_et": None}}
 
     now_local = datetime.now(TZ)
     today_local = now_local.date()
@@ -518,6 +523,29 @@ def get_uv(sunrise_iso, sunset_iso, om):
                     if out["peak_uvi"] is None or dmax > out["peak_uvi"]:
                         out["peak_uvi"] = dmax
                         out["peak_source"] = "open-meteo daily uv_index_max"
+                break
+
+        tomorrow_local = today_local + timedelta(days=1)
+        tom_pts = []
+        for t_str, u in zip(times, uvs):
+            t = datetime.fromisoformat(t_str).replace(tzinfo=TZ)
+            if t.date() == tomorrow_local and u is not None:
+                tom_pts.append((t, u))
+        if tom_pts:
+            tp, tu = max(tom_pts, key=lambda x: x[1])
+            out["tomorrow"]["date"] = tomorrow_local.isoformat()
+            out["tomorrow"]["peak_uvi"] = tu
+            out["tomorrow"]["peak_time_et"] = tp.strftime("%-I:%M %p")
+            if any(u >= 3 for _, u in tom_pts):
+                rise, fall = _uv3_crossings(tom_pts)
+                out["tomorrow"]["above_3_time_et"] = rise.strftime("%-I:%M %p")
+                out["tomorrow"]["below_3_time_et"] = fall.strftime("%-I:%M %p")
+        for i, d_str in enumerate((om or {}).get("daily", {}).get("time") or []):
+            if d_str == tomorrow_local.isoformat():
+                dmax = ((om or {}).get("daily", {}).get("uv_index_max") or [None])[i]
+                if dmax is not None and (out["tomorrow"]["peak_uvi"] is None
+                                         or dmax > out["tomorrow"]["peak_uvi"]):
+                    out["tomorrow"]["peak_uvi"] = dmax
                 break
 
         if out["peak_uvi"] is None:
@@ -906,6 +934,43 @@ def archive_history(summary):
         errors.append(f"weather_history.csv write error: {type(e).__name__}: {e}")
 
 
+def build_hourly_ahead(om, now_local):
+    """Hour-by-hour temperature and UV from now to the end of tomorrow.
+
+    The summary is written twice a day; a briefing may be read six hours later.
+    Anything the summary decides about "what is still ahead" is therefore stale
+    the moment it is written, so it decides nothing — it carries the raw hours
+    and lets whoever reads it work out what is ahead of THEM. That is the same
+    division as everywhere else here: this file fetches, something later
+    interprets.
+    """
+    out = {"source": "Open-Meteo", "generated_et": now_local.isoformat(timespec="seconds"),
+           "note": "From the run time to the end of tomorrow. Filter to hours after "
+                   "the moment you are reading, not after generated_et.",
+           "hours": []}
+    try:
+        hourly = (om or {}).get("hourly") or {}
+        times = hourly.get("time") or []
+        temps = hourly.get("temperature_2m") or []
+        uvs = hourly.get("uv_index") or []
+        end = (now_local.date() + timedelta(days=2))
+        for i, t_str in enumerate(times):
+            t = datetime.fromisoformat(t_str).replace(tzinfo=TZ)
+            if not (now_local.replace(minute=0, second=0, microsecond=0) <= t
+                    and t.date() < end):
+                continue
+            out["hours"].append({
+                "t": t.isoformat(timespec="minutes"),
+                "temp_f": temps[i] if i < len(temps) else None,
+                "uv": uvs[i] if i < len(uvs) else None,
+            })
+        if not out["hours"]:
+            errors.append("hourly_ahead: no forecast hours returned")
+    except Exception as e:
+        errors.append(f"hourly_ahead parse error: {type(e).__name__}: {e}")
+    return out
+
+
 # ── 3-day forecast summary ───────────────────────────────────────────────────
 def build_forecast_3day(forecast_days, now_local):
     """Surface the next 3 days for near-term farm decisions: precip, wind,
@@ -1094,6 +1159,7 @@ def main():
         "wind_today": wind_today,
         "nws_alerts": nws,
         "uv_index": uv,
+        "hourly_ahead": build_hourly_ahead(om, now_local),
         "drought_status": drought,
     }
 
