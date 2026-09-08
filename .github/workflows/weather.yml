@@ -2,11 +2,22 @@ name: RDBF Weather Pre-Processor
 
 on:
   schedule:
-    # Hourly from 2026-09-07. Was twice a day, which left the farm page showing
-    # a reading up to twelve hours old by evening. The station itself updates
-    # every few minutes; this is as close to it as a scheduled job gets without
-    # putting an API key in the browser.
-    - cron: "35 * * * *"
+    # Twice a day, and deliberately so as of 2026-09-08.
+    #
+    # This was briefly hourly, to keep the site's "current conditions" fresh.
+    # That did not work: GitHub throttles scheduled workflows hard, and a cron
+    # asking for hourly produced runs roughly FIVE HOURS apart at arbitrary
+    # minutes, silently dropping the rest. No schedule here is reliable enough
+    # to be a source of "now".
+    #
+    # So "now" moved to where it belongs — the site asks the station directly
+    # when someone opens the page, through a Worker that holds the API key. This
+    # job's remaining work is the DAILY ARCHIVE: one row per calendar day of
+    # soil temperature, settled rainfall, drought class and UV, which is what
+    # the charts are built from and which does not need to be fresh, only
+    # complete. Two runs a day give it a second chance if one is dropped.
+    - cron: "35 9 * * *"
+    - cron: "35 21 * * *"
   workflow_dispatch: {}   # allows manual "Run workflow" button for testing
 
 # Queue runs so they never overlap.
