@@ -2,10 +2,11 @@ name: RDBF Weather Pre-Processor
 
 on:
   schedule:
-    # 09:35 UTC = 5:35 AM EDT (4:35 AM EST in winter).
-    # Second run at 21:35 UTC = 5:35 PM EDT for an evening refresh.
-    - cron: "35 9 * * *"
-    - cron: "35 21 * * *"
+    # Hourly from 2026-09-07. Was twice a day, which left the farm page showing
+    # a reading up to twelve hours old by evening. The station itself updates
+    # every few minutes; this is as close to it as a scheduled job gets without
+    # putting an API key in the browser.
+    - cron: "35 * * * *"
   workflow_dispatch: {}   # allows manual "Run workflow" button for testing
 
 # Queue runs so they never overlap.
