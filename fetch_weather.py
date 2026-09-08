@@ -442,6 +442,41 @@ def build_wind_today(hourly, now_local):
     return out
 
 
+# ── 3. NWS forecast wording ──────────────────────────────────────────────────
+def get_nws_forecast():
+    """The forecaster's own sentences for the current period and the next.
+
+    Everything else in this file is numbers, and every sentence built from them
+    is one we wrote. This is the National Weather Service describing the day in
+    its own words - a synopsis from the people whose job it is, rather than
+    prose assembled out of a temperature and a wind speed.
+
+    Two hops: the point lookup returns the gridpoint URL, which returns the
+    periods. Either can fail, and then this stays null rather than falling back
+    to something invented.
+    """
+    out = {"source": "api.weather.gov", "period": None, "short": None,
+           "detailed": None, "temp_f": None, "is_daytime": None, "next": None}
+    headers = {"Accept": "application/geo+json"}
+    point = fetch_json(f"https://api.weather.gov/points/{LAT},{LON}", headers=headers)
+    url = ((point or {}).get("properties") or {}).get("forecast")
+    if not url:
+        return out
+    data = fetch_json(url, headers=headers)
+    periods = ((data or {}).get("properties") or {}).get("periods") or []
+    if not periods:
+        return out
+    now, nxt = periods[0], (periods[1] if len(periods) > 1 else None)
+    out.update(period=now.get("name"), short=now.get("shortForecast"),
+               detailed=now.get("detailedForecast"), temp_f=now.get("temperature"),
+               is_daytime=now.get("isDaytime"))
+    if nxt:
+        out["next"] = {"period": nxt.get("name"), "short": nxt.get("shortForecast"),
+                       "detailed": nxt.get("detailedForecast"),
+                       "temp_f": nxt.get("temperature")}
+    return out
+
+
 # ── 3. NWS Alerts ────────────────────────────────────────────────────────────
 def get_nws_alerts():
     out = {"source": "api.weather.gov", "active_count": 0, "alerts": [],
@@ -1264,6 +1299,7 @@ def main():
         "forecast_3day": build_forecast_3day(forecast_days, now_local),
         "wind_today": wind_today,
         "nws_alerts": nws,
+        "nws_forecast": get_nws_forecast(),
         "uv_index": uv,
         "hourly_ahead": build_hourly_ahead(om, now_local),
         "drought_status": drought,
