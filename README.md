@@ -72,10 +72,29 @@ automatically — do not edit them by hand.
 
 ## Schedule
 
-Runs automatically at:
-- **5:35 AM Eastern** (morning refresh)
-- **5:35 PM Eastern** (evening refresh — this one catches the fresh Drought
-  Monitor map, which publishes Thursdays around noon Central)
+The cron **asks** for 09:35 and 21:35 UTC — 5:35 AM and 5:35 PM Eastern in
+summer, 4:35 in winter, because the schedule is fixed UTC and Eastern is not.
+
+**It does not get them.** Measured over the fortnight to 2026-09-13, the
+morning run landed 3h29m to 4h17m late and the evening run 1h28m to 2h07m
+late: an average of 2h14m and a worst case of 7h14m. In practice the archive
+is written around 9:40 AM and 7:20 PM Eastern. This is the same throttling
+that made an hourly schedule useless — see the comment in `weather.yml`.
+
+**So why twice a day.** Not for freshness, which this job gave up on: "now"
+comes from the Worker asking the station when someone opens a page. The two
+runs exist so that **a dropped or badly delayed run has a second chance the
+same day**, because what this job produces is the daily archive, and an
+archive has to be complete rather than current.
+
+It is working. As at 2026-09-14 the archive holds 72 rows across 72 calendar
+days: no gaps, no duplicates.
+
+A second, weaker reason is sometimes given for the evening run — that it
+catches the Drought Monitor map, which publishes Thursdays around noon
+Central. True, and not the reason to keep it: that argument justifies a run on
+Thursdays and this one earns its place every day. **Do not cut the evening run
+to Thursdays.** The drop protection is the point and it is load-bearing.
 
 You can also trigger a run any time: **Actions → RDBF Weather Pre-Processor →
 Run workflow**.
