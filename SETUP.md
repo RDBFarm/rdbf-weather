@@ -1,7 +1,9 @@
 # RDBF — Weather Pre-Processor Setup (~10 minutes)
 
-After this setup, the weather stack runs itself twice a day (5:35 AM and 5:35 PM
-Eastern) and your debrief Shortcut fetches ONE url instead of five.
+After this setup, the weather stack runs itself twice a day and your debrief
+Shortcut fetches ONE url instead of five. The cron asks for 5:35 AM and 5:35 PM
+Eastern; GitHub delivers it a couple of hours late and sometimes more, which is
+why there are two runs rather than one. See README → Schedule.
 
 ## What I could not do for you (requires your accounts)
 
