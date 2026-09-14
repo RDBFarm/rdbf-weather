@@ -75,11 +75,25 @@ automatically — do not edit them by hand.
 The cron **asks** for 09:35 and 21:35 UTC — 5:35 AM and 5:35 PM Eastern in
 summer, 4:35 in winter, because the schedule is fixed UTC and Eastern is not.
 
-**It does not get them.** Measured over the fortnight to 2026-09-13, the
-morning run landed 3h29m to 4h17m late and the evening run 1h28m to 2h07m
-late: an average of 2h14m and a worst case of 7h14m. In practice the archive
-is written around 9:40 AM and 7:20 PM Eastern. This is the same throttling
-that made an hourly schedule useless — see the comment in `weather.yml`.
+**It does not get them.** Over the whole recorded history — every run since
+2026-08-28 — **3 of 38 scheduled runs arrived on time**. The median is 3h11m
+late and the worst was 11h24m. The morning slot is the bad one; the evening
+slot usually lands within two hours. In practice the archive is written
+around 9:40 AM and 7:20 PM Eastern.
+
+These figures are **not maintained here**. `rdbf-app` measures them from
+`ops/run_log.json` and shows them on its feed page, which is the number to
+trust — a figure typed into a README is right on the day it is typed. (An
+earlier version of this paragraph gave an average of 2h14m and a worst case
+of 7h14m over the fortnight to 2026-09-13. Both were correct for that
+window and neither matches the record as a whole, which is the point.)
+
+This is the same throttling that made an hourly schedule useless, and that
+is now measured too rather than remembered: for the sixteen hours the cron
+was set to hourly on 2026-09-08, **thirteen of the sixteen slots produced no
+run at all** — four ran, at 06:29, 11:40, 16:49 and 17:01 UTC. Every missed
+run in the entire record falls inside that window. See the comment in
+`weather.yml`.
 
 **So why twice a day.** Not for freshness, which this job gave up on: "now"
 comes from the Worker asking the station when someone opens a page. The two
@@ -87,8 +101,11 @@ runs exist so that **a dropped or badly delayed run has a second chance the
 same day**, because what this job produces is the daily archive, and an
 archive has to be complete rather than current.
 
-It is working. As at 2026-09-14 the archive holds 72 rows across 72 calendar
-days: no gaps, no duplicates.
+It is working, and this is the strongest evidence in the record. As at
+2026-09-14 the archive holds 72 rows across 72 calendar days: no gaps, no
+duplicates. Thirty-five runs landed late and thirteen never landed at all,
+and **every calendar day still closed**. The second run is what absorbed
+that.
 
 A second, weaker reason is sometimes given for the evening run — that it
 catches the Drought Monitor map, which publishes Thursdays around noon
