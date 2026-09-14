@@ -1,13 +1,24 @@
-# RDBF
+# RDBF Weather Pre-Processor
 
-Automated data systems for **Red Devil Bison Farm** (Poolesville, MD).
+The weather component of **RDBF**, the farm automation system for **Red Devil
+Bison Farm** (Poolesville, MD).
 
-This repository is the home for RDBF's farm automation. Its first component is
-the **Weather Pre-Processor** — a pipeline that runs on GitHub Actions twice a
-day, aggregates five free weather sources into a single file the farm debrief
-can read with one request, and keeps a permanent daily history. More components
-will live alongside it as the system grows; everything documented below covers
-the Weather Pre-Processor.
+**The main system is [`RDBFarm/rdbf-app`](https://github.com/RDBFarm/rdbf-app)** —
+the farm's records (herd, land, equipment, people, places, and the append-only
+logs of what has happened to each) and the app that reads them. Its `SPEC.md` is
+the design document for the whole system, and it governs this repository too.
+Start there.
+
+This repository is one input to that system, and nothing else lives here. It
+runs on GitHub Actions twice a day, aggregates five free weather sources into a
+single file the debrief can read with one request, and keeps a permanent daily
+history. `rdbf-app` copies the output into its own `docs/data/` half an hour
+after each run; it consumes this work rather than duplicating it.
+
+An earlier version of this file called this repository "the home for RDBF's farm
+automation" and said more components would grow alongside it. That was true when
+weather was the only piece. It is not true now, and it left this repository with
+no pointer to the system it feeds.
 
 ---
 
