@@ -1154,6 +1154,14 @@ def build_forecast_3day(forecast_days, now_local):
             "temp_min_f": tmin,
             "wind_max_mph": d.get("wind_max_mph"),
             "wind_gust_max_mph": g,
+            # The dominant direction for the day. Already fetched from
+            # Open-Meteo as winddirection_10m_dominant and already on the
+            # forecast_daily rows; it simply never made it into this summary,
+            # so anything reading the three-day window got a wind speed with
+            # no direction -- half a fact, and the half that does not tell you
+            # which side of the field to work.
+            "wind_dir_deg": d.get("wind_dir_deg"),
+            "wind_dir_compass": d.get("wind_dir_compass"),
             "frost": frost,
             "freeze": freeze,
         })
