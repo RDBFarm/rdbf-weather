@@ -195,6 +195,104 @@ def get_wu_7day_summary():
     return data.get("summaries") or None
 
 
+def get_wu_forecast():
+    """Weather Underground's own forecast, on the same key as the station.
+
+    The owner asked for this 2026-09-16: he reads WU, and the page was giving
+    him Open-Meteo numbers and an NWS sentence but not the forecast he is used
+    to. It is a THIRD independent forecast, not a replacement -- three sources
+    disagreeing is information, and it is how the SSE run in this week's window
+    was checked.
+
+    IT DOES NOT MAKE ANYTHING FRESHER. The staleness the owner hit this morning
+    is the twice-a-day schedule, not the sources; this rides the same run.
+
+    UNVERIFIED FROM THE MACHINE THAT WROTE IT. api.weather.com is blocked by
+    this session's egress proxy, and WU_API_KEY is a repository secret, so
+    neither the authorization nor the response shape could be checked here. Two
+    things are genuinely unknown until this runs for real:
+
+      - whether a PWS key authorizes /v3/wx/*, which is a different product
+        family from the /v2/pws/* endpoints this file already calls. If it does
+        not, the call 401s, fetch_json records it in data_integrity, and
+        everything else in the run is unaffected.
+      - the exact field names. The parse below takes what it finds and leaves
+        the rest null rather than assuming, and `parsed_keys` records which
+        keys were actually present, so the first real run answers this instead
+        of another guess.
+    """
+    if not WU_API_KEY:
+        return None
+    url = (f"https://api.weather.com/v3/wx/forecast/daily/5day"
+           f"?geocode={LAT},{LON}&format=json&units=e&language=en-US"
+           f"&apiKey={WU_API_KEY}")
+    data = fetch_json(url)
+    if not data:
+        return None
+
+    def col(name):
+        v = data.get(name)
+        return v if isinstance(v, list) else []
+
+    dates = col("validTimeLocal")
+    if not dates:
+        errors.append("WU forecast returned no validTimeLocal — shape differs "
+                      "from what was expected; keys seen: "
+                      + ", ".join(sorted(data.keys())[:12]))
+        return {"source": "Weather Underground (api.weather.com v3 5day)",
+                "days": [], "parsed_keys": sorted(data.keys())}
+
+    # The twice-daily narrative lives in daypart[0], as parallel arrays twice
+    # the length of the daily ones: day, night, day, night...
+    dp = (data.get("daypart") or [{}])[0] or {}
+
+    def dpcol(name):
+        v = dp.get(name)
+        return v if isinstance(v, list) else []
+
+    def at(seq, i):
+        return seq[i] if i < len(seq) else None
+
+    days = []
+    for i, when in enumerate(dates):
+        days.append({
+            "date": str(when)[:10],
+            "narrative": at(col("narrative"), i),
+            "temp_max_f": at(col("temperatureMax"), i),
+            "temp_min_f": at(col("temperatureMin"), i),
+            "qpf_in": at(col("qpf"), i),
+            "qpf_snow_in": at(col("qpfSnow"), i),
+            # Daytime half of the day: index 2i. A run started after noon has
+            # null there, because that half is over -- WU sends null, not zero,
+            # and it must not be read as "no chance of rain".
+            "day": {
+                "name": at(dpcol("daypartName"), i * 2),
+                "phrase": at(dpcol("wxPhraseLong"), i * 2),
+                "precip_chance_pct": at(dpcol("precipChance"), i * 2),
+                "precip_type": at(dpcol("precipType"), i * 2),
+                "wind_mph": at(dpcol("windSpeed"), i * 2),
+                "wind_from": at(dpcol("windDirectionCardinal"), i * 2),
+                "narrative": at(dpcol("narrative"), i * 2),
+            },
+            "night": {
+                "name": at(dpcol("daypartName"), i * 2 + 1),
+                "phrase": at(dpcol("wxPhraseLong"), i * 2 + 1),
+                "precip_chance_pct": at(dpcol("precipChance"), i * 2 + 1),
+                "wind_mph": at(dpcol("windSpeed"), i * 2 + 1),
+                "wind_from": at(dpcol("windDirectionCardinal"), i * 2 + 1),
+            },
+        })
+    return {
+        "source": "Weather Underground (api.weather.com v3 5day)",
+        "station_key": "the same PWS key as the station observations",
+        "days": days,
+        # What the response actually contained, so the next change to this
+        # parser is made against a real shape rather than a remembered one.
+        "parsed_keys": sorted(data.keys()),
+        "daypart_keys": sorted(dp.keys()),
+    }
+
+
 def wu_7day_precip(summaries):
     """Extract just date + precip from the summaries list (past 7 days)."""
     if not summaries:
@@ -1308,6 +1406,9 @@ def main():
         "wind_today": wind_today,
         "nws_alerts": nws,
         "nws_forecast": get_nws_forecast(),
+        # A third forecast, beside Open-Meteo's numbers and the NWS sentence.
+        # Null when the key does not authorize it — see get_wu_forecast.
+        "wu_forecast": get_wu_forecast(),
         "uv_index": uv,
         "hourly_ahead": build_hourly_ahead(om, now_local),
         "drought_status": drought,
