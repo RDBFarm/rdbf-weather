@@ -26,7 +26,7 @@ permissions:
 
 jobs:
   backfill-drought:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
