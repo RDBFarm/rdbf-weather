@@ -35,7 +35,11 @@ env:
 
 jobs:
   fetch-weather:
-    runs-on: ubuntu-latest
+    # A NAMED IMAGE (2026-10-07). ubuntu-latest moves to Ubuntu 26 from
+    # 19 October 2026 (GitHub's notice). This collects the farm's weather
+    # history that rdbf-app reads, so it stays on the image its runs have
+    # been on; it names its Python too. rdbf-app's workflows say the same.
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
