@@ -1,6 +1,6 @@
 {
   "schema_version": "1.1",
-  "generated_et": "2026-10-09T17:35:38-04:00",
+  "generated_et": "2026-10-09T17:35:53-04:00",
   "run_type": "manual",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
@@ -9,15 +9,15 @@
   "current_conditions": {
     "source": "KMDPOOLE58",
     "temp_f": 69,
-    "humidity_pct": 60,
+    "humidity_pct": 61,
     "dew_point_f": 55,
     "dew_point_band": "comfortable",
     "dew_point_source": "station",
-    "wind_mph": 0,
+    "wind_mph": 1,
     "wind_dir_deg": 342,
     "precip_today_in": 0.0,
     "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-10-09 17:35:34",
+    "obs_time_local": "2026-10-09 17:35:44",
     "dew_point_scale": {
       "units": "F",
       "source": "conventional dew-point comfort scale",
@@ -464,7 +464,7 @@
   },
   "hourly_ahead": {
     "source": "Open-Meteo",
-    "generated_et": "2026-10-09T17:35:38-04:00",
+    "generated_et": "2026-10-09T17:35:53-04:00",
     "note": "From the run time to the end of tomorrow. Filter to hours after the moment you are reading, not after generated_et.",
     "hours": [
       {
