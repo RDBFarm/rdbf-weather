@@ -1,0 +1,61 @@
+name: RDBF Forecast Backtest
+
+# One-time (re-runnable) look BACKWARD: what each weather model had predicted
+# 1-7 days ahead for every day the farm station has on record, scored against
+# the station. Manual only; there is no schedule.
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: weather-writer
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Fetch archived model forecasts
+        run: python backtest_open_meteo.py
+
+      - name: Score them against the station
+        run: python score_forecasts.py backtest_log.csv backtest_scores.csv backtest_scores.md
+
+      - name: Post scorecard to run summary
+        if: always()
+        run: |
+          if [ -f backtest_scores.md ]; then
+            cat backtest_scores.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Commit backtest files
+        run: |
+          git config user.name "rdbf-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add backtest_log.csv backtest_scores.csv backtest_scores.md
+          if git diff --cached --quiet; then
+            echo "No backtest changes to commit."
+            exit 0
+          fi
+          git commit -m "Forecast backtest $(TZ=America/New_York date +'%Y-%m-%d %-I:%M %p %Z')"
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            echo "Push rejected — rebasing onto the remote (attempt $attempt)."
+            git pull --rebase origin main
+            sleep 2
+          done
+          echo "Push still failing after 5 attempts."
+          exit 1

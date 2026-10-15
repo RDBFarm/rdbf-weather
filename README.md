@@ -51,6 +51,14 @@ a key, stored as a GitHub secret named `WU_API_KEY` — never in any file.
 | `.github/workflows/weather.yml` | The schedule + commit logic | You (upload) |
 | `weather_summary.json` | Latest snapshot (overwritten each run) | The script |
 | `weather_history.csv` | Permanent daily archive (append-only) | The script |
+| `forecast_log.py` | Saves each day's forecasts (Open-Meteo ECMWF and GFS; NWS) | You (upload) |
+| `score_forecasts.py` | Scores saved forecasts against the station, by lead time | You (upload) |
+| `backtest_open_meteo.py` | Scores archived model forecasts (Open-Meteo Previous Runs) against the station | You (upload) |
+| `.github/workflows/forecast-log.yml` | Runs the logger and scorer twice a day | You (upload) |
+| `.github/workflows/backtest.yml` | Runs the backtest; manual only | You (upload) |
+| `forecast_log.csv` | Every forecast saved (append-only ledger) | The script |
+| `forecast_scores.csv` / `.md` | Live scorecard, rebuilt from the ledger each run | The script |
+| `backtest_log.csv`, `backtest_scores.csv` / `.md` | Backtest forecasts and their scorecard | The script |
 | `SETUP.md` | One-time setup steps | Reference |
 | `README.md` | This file | Reference |
 
