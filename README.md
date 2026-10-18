@@ -69,10 +69,16 @@ automatically — do not edit them by hand.
 
 ## Schedule
 
-The cron **asks** for 09:35 and 21:35 UTC — 5:35 AM and 5:35 PM Eastern in
-summer, 4:35 in winter, because the schedule is fixed UTC and Eastern is not.
+**Started by rdbf-app's Worker** at 09:35 and 21:35 UTC — 5:35 AM and 5:35 PM
+Eastern in summer, 4:35 in winter, because the times are fixed UTC and Eastern
+is not. Its Cloudflare cron presses Run workflow on the minute (since
+2026-09-27), so these runs are tagged `run_type: manual`. GitHub's own schedule
+ran beside it as a late backup until 2026-10-18, when the owner had it removed
+(none of the Worker's starts had failed). Nothing else starts this job now: a
+start that does not happen waits for the next one, twelve hours later.
 
-**It does not get them.** Measured over the fortnight to 2026-09-13, the
+**Why the Worker and not GitHub's schedule.** GitHub's schedule asked for the
+same times and did not get them. Measured over the fortnight to 2026-09-13, the
 morning run landed 3h29m to 4h17m late and the evening run 1h28m to 2h07m
 late: an average of 2h14m and a worst case of 7h14m. In practice the archive
 is written around 9:40 AM and 7:20 PM Eastern. This is the same throttling

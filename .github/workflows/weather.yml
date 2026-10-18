@@ -1,7 +1,6 @@
 name: RDBF Weather Pre-Processor
 
 on:
-  schedule:
     # Twice a day, and deliberately so as of 2026-09-08.
     #
     # This was briefly hourly, to keep the site's "current conditions" fresh.
@@ -16,9 +15,16 @@ on:
     # soil temperature, settled rainfall, drought class and UV, which is what
     # the charts are built from and which does not need to be fresh, only
     # complete. Two runs a day give it a second chance if one is dropped.
-    - cron: "35 9 * * *"
-    - cron: "35 21 * * *"
-  workflow_dispatch: {}   # allows manual "Run workflow" button for testing
+    #
+    # THOSE TWO RUNS ARE STARTED BY RDBF-APP'S WORKER, on the minute, at 09:35
+    # and 21:35 UTC (since 2026-09-27; its Cloudflare cron calls Run workflow).
+    # GitHub's own schedule at the same times ran beside it as a backup, hours
+    # late, until 2026-10-18, when the owner had it removed: "I don't see a
+    # need for any back up weather service if we have never had a failure on
+    # the newer weather service fetch. If it fails, no big deal, but I still
+    # like the idea of getting the forecast updated twice daily." Not one of
+    # the Worker's 45 starts had failed.
+  workflow_dispatch: {}   # the Worker's two daily starts, and the Run workflow button
 
 # Queue runs so they never overlap.
 concurrency:
@@ -28,8 +34,9 @@ concurrency:
 permissions:
   contents: write
 
-# A manual "Run workflow" is tagged run_type=manual in the JSON; the two
-# scheduled runs are tagged run_type=scheduled. Lets you tell test runs apart.
+# A run started through Run workflow is tagged run_type=manual in the JSON,
+# and since 2026-10-18 that is every run: the Worker's two daily starts too.
+# The "scheduled" branch below only matters if a schedule is ever put back.
 env:
   RUN_TYPE: ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'scheduled' }}
 
