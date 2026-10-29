@@ -17,7 +17,8 @@ One row per (log_date, target_date), appended to ensemble_log.csv:
     log_date, logged_et, run_init_et, target_date, lead_days,
     high_mean_f, high_sd_f, low_mean_f, low_sd_f, members,
     site_high_f, site_high_spread_f, site_low_f, site_low_spread_f,
-    wind_mean_mph, wind_spread_mph, gust_max_mph
+    wind_mean_mph, wind_spread_mph, gust_max_mph,
+    runs_wind_mean_mph, runs_wind_sd_mph, runs_gust_max_mph
 
   high_mean_f / high_sd_f   each run's own highest hourly temperature that
                             day; their average and standard deviation across
@@ -30,6 +31,15 @@ One row per (log_date, target_date), appended to ensemble_log.csv:
   wind_mean_mph             the day's average of the published average wind
   wind_spread_mph           the day's average of its published spread
   gust_max_mph              the day's strongest hour of the published gusts
+  runs_wind_mean_mph        each run's own average wind speed that day; their
+  runs_wind_sd_mph          average and standard deviation across the runs
+  runs_gust_max_mph         each run's strongest hourly gust; their average
+                            (Added 2026-10-29, the first day: the published
+                            average wind looked too low beside its spread,
+                            1.8 mph ± 6.4 eight days out, as if averaged as
+                            direction and speed together, which cancels when
+                            the runs disagree on direction. Both are kept,
+                            so the two can be compared.)
   run_init_et               the GEFS run the numbers came from
 
 Data-integrity rules (same as fetch_weather.py)
@@ -65,6 +75,7 @@ FIELDS = [
     "high_mean_f", "high_sd_f", "low_mean_f", "low_sd_f", "members",
     "site_high_f", "site_high_spread_f", "site_low_f", "site_low_spread_f",
     "wind_mean_mph", "wind_spread_mph", "gust_max_mph",
+    "runs_wind_mean_mph", "runs_wind_sd_mph", "runs_gust_max_mph",
 ]
 
 errors = []
@@ -122,6 +133,18 @@ def build_rows(members_json, mean_json, run_init, now):
     mh = (members_json or {}).get("hourly") or {}
     times = mh.get("time") or []
     member_keys = [k for k in mh if k == "temperature_2m" or k.startswith("temperature_2m_member")]
+    # The same runs' wind: each run's own day of speeds and gusts.
+    runs_wind = {}
+    for k in [k for k in mh if k == "wind_speed_10m" or k.startswith("wind_speed_10m_member")]:
+        g = mh.get(k.replace("wind_speed_10m", "wind_gusts_10m"))
+        gd = by_day(times, g) if g else {}
+        for day, vals in by_day(times, mh[k]).items():
+            gv = gd.get(day) or []
+            if len(vals) == 24 and all(v is not None for v in vals):
+                d = runs_wind.setdefault(day, {"mean": [], "gust": []})
+                d["mean"].append(statistics.mean(vals))
+                if len(gv) == 24 and all(v is not None for v in gv):
+                    d["gust"].append(max(gv))
     # Each run's daily high and low, only from a full day of hours.
     per_day = {}
     for k in member_keys:
@@ -165,6 +188,12 @@ def build_rows(members_json, mean_json, run_init, now):
             row["wind_spread_mph"] = rnd(statistics.mean(ws))
         if len(g) == 24 and all(v is not None for v in g):
             row["gust_max_mph"] = rnd(max(g))
+        rw = runs_wind.get(day)
+        if rw and rw["mean"]:
+            row["runs_wind_mean_mph"] = rnd(statistics.mean(rw["mean"]))
+            row["runs_wind_sd_mph"] = rnd(sd(rw["mean"]))
+        if rw and rw["gust"]:
+            row["runs_gust_max_mph"] = rnd(statistics.mean(rw["gust"]))
         if all(row.get(k, "") == "" for k in ("high_mean_f", "site_high_f", "wind_mean_mph")):
             continue
         rows.append({k: row.get(k, "") for k in FIELDS})
@@ -175,6 +204,22 @@ def run_init_et():
     meta = fetch_json(f"https://ensemble-api.open-meteo.com/data/{MODEL}/static/meta.json")
     t = (meta or {}).get("last_run_initialisation_time")
     return datetime.fromtimestamp(t, TZ).strftime("%Y-%m-%dT%H:%M%z") if t else None
+
+
+def widen(path):
+    """Give rows written before a column existed that column, blank: no row
+    or value is lost, and every row has the header's columns."""
+    if not path.exists() or path.stat().st_size == 0:
+        return
+    with open(path, newline="") as f:
+        r = csv.DictReader(f)
+        if r.fieldnames == FIELDS:
+            return
+        rows = list(r)
+    with open(path, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=FIELDS)
+        w.writeheader()
+        w.writerows({k: x.get(k, "") or "" for k in FIELDS} for x in rows)
 
 
 def existing_keys(path):
@@ -191,10 +236,11 @@ def main():
     path = Path(LOG_FILE)
     keys = existing_keys(path)
     run = run_init_et()
-    members = fetch_json(ensemble_url(MODEL, "temperature_2m"))
+    members = fetch_json(ensemble_url(MODEL, "temperature_2m,wind_speed_10m,wind_gusts_10m"))
     mean = fetch_json(ensemble_url(MODEL + "_ensemble_mean",
                                    "temperature_2m,temperature_2m_spread,wind_speed_10m,wind_speed_10m_spread,wind_gusts_10m"))
     rows = [r for r in build_rows(members, mean, run, now) if (r["log_date"], r["target_date"]) not in keys]
+    widen(path)
     if rows:
         new = not path.exists() or path.stat().st_size == 0
         with open(path, "a", newline="") as f:
