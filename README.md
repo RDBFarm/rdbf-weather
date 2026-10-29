@@ -52,11 +52,13 @@ a key, stored as a GitHub secret named `WU_API_KEY` — never in any file.
 | `weather_summary.json` | Latest snapshot (overwritten each run) | The script |
 | `weather_history.csv` | Permanent daily archive (append-only) | The script |
 | `forecast_log.py` | Saves each day's forecasts (Open-Meteo ECMWF and GFS; NWS) | You (upload) |
+| `ensemble_log.py` | Saves each morning's NOAA GEFS ensemble (31 runs) for the next 10 days: the runs' daily highs and lows with their spread, the hourly average and spread the trip site draws, and wind, wind spread and gusts. For re-measuring the trip site's "likely range" multiples, and asking whether windy days need wider ones (since 2026-10-29) | You (upload) |
 | `score_forecasts.py` | Scores saved forecasts against the station, by lead time | You (upload) |
 | `backtest_open_meteo.py` | Scores archived model forecasts (Open-Meteo Previous Runs) against the station | You (upload) |
 | `.github/workflows/forecast-log.yml` | Runs the logger and scorer twice a day | You (upload) |
 | `.github/workflows/backtest.yml` | Runs the backtest; manual only | You (upload) |
 | `forecast_log.csv` | Every forecast saved (append-only ledger) | The script |
+| `ensemble_log.csv` | Every ensemble forecast saved (append-only ledger, one row per day and target day) | The script |
 | `forecast_scores.csv` / `.md` | Live scorecard, rebuilt from the ledger each run | The script |
 | `backtest_log.csv`, `backtest_scores.csv` / `.md` | Backtest forecasts and their scorecard | The script |
 | `SETUP.md` | One-time setup steps | Reference |

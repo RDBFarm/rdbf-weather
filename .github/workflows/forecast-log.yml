@@ -35,6 +35,11 @@ jobs:
       - name: Save today's forecasts
         run: python forecast_log.py
 
+      # NOAA's ensemble, for scoring its spread (ensemble_log.py says why).
+      # It never fails the job: a missing ensemble must not cost the rows above.
+      - name: Save today's ensemble forecast
+        run: python ensemble_log.py
+
       - name: Update the scorecard
         run: python score_forecasts.py
 
@@ -55,7 +60,9 @@ jobs:
           # remote and re-run, same approach as weather.yml: the logger skips
           # rows already present, so nothing is lost or duplicated.
           for attempt in 1 2 3 4 5; do
-            git add forecast_log.csv forecast_scores.csv forecast_scores.md
+            # The ensemble ledger only once it exists: a first run that got no
+            # ensemble must still commit the forecasts.
+            git add forecast_log.csv forecast_scores.csv forecast_scores.md $(ls ensemble_log.csv 2>/dev/null)
             if git diff --cached --quiet; then
               echo "No forecast changes to commit."
               exit 0
@@ -72,6 +79,7 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             python forecast_log.py
+            python ensemble_log.py
             python score_forecasts.py
             sleep 2
           done
