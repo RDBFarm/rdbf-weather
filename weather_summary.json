@@ -1,11 +1,11 @@
 {
   "schema_version": "1.1",
-  "generated_et": "2026-11-14T16:35:53-05:00",
+  "generated_et": "2026-11-15T04:36:02-05:00",
   "run_type": "manual",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
     "errors_this_run": [
-      "https://api.open-meteo.com/v1/forecast -> HTTPError: HTTP Error 429: Too Many Requests",
+      "https://api.open-meteo.com/v1/forecast -> URLError: <urlopen error _ssl.c:994: The handshake operation timed out>",
       "Open-Meteo unavailable \u2014 soil temps and forecast are null",
       "UV peak unavailable \u2014 Open-Meteo returned no uv_index for today",
       "3-day forecast: no upcoming days available",
@@ -14,16 +14,16 @@
   },
   "current_conditions": {
     "source": "KMDPOOLE58",
-    "temp_f": 47,
-    "humidity_pct": 58,
+    "temp_f": 44,
+    "humidity_pct": 64,
     "dew_point_f": 33,
     "dew_point_band": "dry",
     "dew_point_source": "station",
-    "wind_mph": 11,
-    "wind_dir_deg": 311,
+    "wind_mph": 4,
+    "wind_dir_deg": 265,
     "precip_today_in": 0.0,
     "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-11-14 16:35:44",
+    "obs_time_local": "2026-11-15 04:35:57",
     "dew_point_scale": {
       "units": "F",
       "source": "conventional dew-point comfort scale",
@@ -41,19 +41,19 @@
   },
   "yesterday": {
     "source": "KMDPOOLE58",
-    "date": "2026-11-13",
-    "temp_high_f": 50,
-    "temp_low_f": 42,
+    "date": "2026-11-14",
+    "temp_high_f": 49,
+    "temp_low_f": 41,
     "temp_avg_f": 45,
-    "humidity_high_pct": 72,
+    "humidity_high_pct": 67,
     "humidity_low_pct": 52,
-    "humidity_avg_pct": 61,
-    "wind_avg_mph": 9,
-    "wind_high_mph": 24,
-    "wind_gust_high_mph": 24,
-    "wind_dir_avg_deg": 323,
+    "humidity_avg_pct": 59,
+    "wind_avg_mph": 8,
+    "wind_high_mph": 21,
+    "wind_gust_high_mph": 21,
+    "wind_dir_avg_deg": 292,
     "precip_total_in": 0.0,
-    "narrative": "Yesterday at the farm: High 50, low 42, no rain, gusts to 24 mph."
+    "narrative": "Yesterday at the farm: High 49, low 41, no rain, gusts to 21 mph."
   },
   "soil_temperature": {
     "source": "Open-Meteo",
@@ -70,10 +70,6 @@
     "today_actual_in": null,
     "today_estimate_note": null,
     "past_7day_station_actuals": [
-      {
-        "date": "2026-11-08",
-        "precip_in": 0.0
-      },
       {
         "date": "2026-11-09",
         "precip_in": 0.0
@@ -96,6 +92,10 @@
       },
       {
         "date": "2026-11-14",
+        "precip_in": 0.0
+      },
+      {
+        "date": "2026-11-15",
         "precip_in": 0.0
       }
     ]
@@ -129,22 +129,22 @@
   },
   "nws_forecast": {
     "source": "api.weather.gov",
-    "period": "This Afternoon",
-    "short": "Scattered Rain Showers",
-    "detailed": "Scattered rain showers. Mostly cloudy, with a high near 49. Northwest wind around 16 mph, with gusts as high as 30 mph.",
-    "temp_f": 49,
-    "is_daytime": true,
+    "period": "Overnight",
+    "short": "Scattered Rain And Snow Showers",
+    "detailed": "Scattered rain and snow showers. Partly cloudy, with a low around 38. Northwest wind around 10 mph, with gusts as high as 18 mph.",
+    "temp_f": 38,
+    "is_daytime": false,
     "next": {
-      "period": "Tonight",
-      "short": "Scattered Rain And Snow Showers",
-      "detailed": "Scattered rain showers before 11pm, then scattered rain and snow showers. Mostly cloudy, with a low around 38. Northwest wind 10 to 15 mph, with gusts as high as 25 mph.",
-      "temp_f": 38
+      "period": "Sunday",
+      "short": "Chance Rain And Snow Showers",
+      "detailed": "A chance of rain and snow showers before 5pm. Mostly cloudy, with a high near 52. Northwest wind 8 to 14 mph, with gusts as high as 23 mph.",
+      "temp_f": 52
     }
   },
   "uv_index": {
     "source": "open-meteo (daily peak + crossings), currentuvindex.com (current)",
     "timezone": "America/New_York",
-    "current_uvi": 0.2,
+    "current_uvi": 0,
     "above_3_time_et": null,
     "below_3_time_et": null,
     "peak_uvi": null,
@@ -164,7 +164,7 @@
   },
   "hourly_ahead": {
     "source": "Open-Meteo",
-    "generated_et": "2026-11-14T16:35:53-05:00",
+    "generated_et": "2026-11-15T04:36:02-05:00",
     "note": "From the run time to the end of tomorrow. Filter to hours after the moment you are reading, not after generated_et.",
     "hours": []
   },
