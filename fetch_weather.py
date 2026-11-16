@@ -25,6 +25,7 @@ import json
 import math
 import os
 import sys
+import time
 import urllib.parse
 import urllib.request
 import urllib.error
@@ -282,7 +283,20 @@ def get_open_meteo():
            "windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant"
            "&temperature_unit=fahrenheit&windspeed_unit=mph"
            "&timezone=America%2FNew_York&past_days=7")
-    return fetch_json(url)
+    # Three tries, 20 s apart, as backtest_open_meteo.py does. One try was
+    # all this had, and from 2026-11-12 one try failed in 5 runs of 10 (TLS
+    # handshake timeouts, once a 429), each time losing the soil temperatures,
+    # the forecast and UV for the whole run. A failed try stays in the errors,
+    # so a run that needed a retry still says so.
+    for attempt in range(3):
+        if attempt:
+            time.sleep(20)
+        data = fetch_json(url)
+        if data is not None:
+            if attempt:
+                errors.append(f"Open-Meteo answered on try {attempt + 1} of 3")
+            return data
+    return None
 
 
 def latest_non_null(times, values, now_local):
