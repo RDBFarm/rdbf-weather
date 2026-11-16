@@ -33,7 +33,7 @@ history, trends, and charts.
 | # | Source | Provides |
 |---|--------|----------|
 | 1 | Weather Underground station **KMDPOOLE58** | Current conditions, actual rain totals, yesterday's daily summary |
-| 2 | Open-Meteo | Soil temps (0cm/6cm), precip forecast, sunrise/sunset |
+| 2 | Open-Meteo | Soil temps (0cm/6cm), precip forecast, sunrise/sunset. Asked by rdbf-app's Worker from the farm's Cloudflare account and passed to the run; the run asks directly (three tries) if none arrives. `data_integrity.open_meteo_via` says which. |
 | 3 | NWS Alerts (api.weather.gov) | Active weather alerts (test messages filtered out) |
 | 4 | currentuvindex.com | Hourly UV forecast (converted UTC → Eastern) |
 | 5 | US Drought Monitor | County drought status, FIPS 24031 (Montgomery Co MD) |

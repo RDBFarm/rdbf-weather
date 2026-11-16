@@ -19,7 +19,9 @@ Data-integrity rules (non-negotiable):
     Fog (45-48): NOT precipitation.
 """
 
+import base64
 import csv
+import gzip
 import io
 import json
 import math
@@ -271,7 +273,55 @@ def wu_yesterday(summaries, now_local):
 
 
 # ── 2. Open-Meteo (soil temps, precip history + forecast, weathercode) ──────
-def get_open_meteo():
+# Where this run's Open-Meteo answer came from, for data_integrity.
+OM_VIA = {"via": None, "fetched_at": None}
+
+# How old an answer the Worker passed on may be and still be used. The soil
+# reading is the latest hour at or before the run's own time; an answer
+# fetched long before the run began would hand it a forecast hour instead.
+OM_HANDOFF_MAX_AGE = timedelta(minutes=30)
+
+
+def om_from_worker(url, now_local):
+    """The Open-Meteo answer rdbf-app's Worker fetched just before starting
+    this run, if it passed one on (OM_PAYLOAD: gzip, then base64), else None.
+
+    Open-Meteo limits its free API per address, "and application", and its
+    terms say: "Consider using Cloudflare Workers, as we apply limits per
+    Cloudflare user." GitHub's runners share their addresses; from 2026-11-12
+    one try from here failed in 5 runs of 10. So the Worker asks, from the
+    farm's own Cloudflare account, and hands the answer over. Anything wrong
+    with it is said, and the run asks Open-Meteo itself as before."""
+    b64 = os.environ.get("OM_PAYLOAD", "").strip()
+    if not b64:
+        return None
+    try:
+        data = json.loads(gzip.decompress(base64.b64decode(b64)).decode("utf-8"))
+        at = datetime.fromisoformat(os.environ.get("OM_AT", "").replace("Z", "+00:00"))
+    except Exception as e:
+        errors.append(f"the Worker's Open-Meteo answer could not be read ({type(e).__name__}); "
+                      "asked Open-Meteo directly")
+        return None
+    age = now_local - at
+    if age > OM_HANDOFF_MAX_AGE or age < -timedelta(minutes=5):
+        errors.append(f"the Worker's Open-Meteo answer was fetched {at.astimezone(TZ):%-I:%M %p %Z}, "
+                      "too far from this run; asked Open-Meteo directly")
+        return None
+    # It must answer the question this script asks: every field the URL names.
+    q = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+    missing = [f"{part}.{k}" for part in ("hourly", "daily")
+               for k in q.get(part, [""])[0].split(",")
+               if k and k not in (data.get(part) or {})]
+    if missing:
+        errors.append("the Worker's Open-Meteo answer lacks " + ", ".join(missing[:4])
+                      + "; asked Open-Meteo directly")
+        return None
+    OM_VIA.update(via="rdbf-app Worker (Cloudflare)",
+                  fetched_at=at.astimezone(TZ).isoformat(timespec="seconds"))
+    return data
+
+
+def get_open_meteo(now_local=None):
     # Confirmed-working URL from the April session, plus sunrise/sunset for UV sanity checks.
     url = ("https://api.open-meteo.com/v1/forecast"
            f"?latitude={LAT}&longitude={LON}"
@@ -283,6 +333,9 @@ def get_open_meteo():
            "windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant"
            "&temperature_unit=fahrenheit&windspeed_unit=mph"
            "&timezone=America%2FNew_York&past_days=7")
+    handed = om_from_worker(url, now_local or datetime.now(TZ))
+    if handed is not None:
+        return handed
     # Three tries, 20 s apart, as backtest_open_meteo.py does. One try was
     # all this had, and from 2026-11-12 one try failed in 5 runs of 10 (TLS
     # handshake timeouts, once a 429), each time losing the soil temperatures,
@@ -295,6 +348,8 @@ def get_open_meteo():
         if data is not None:
             if attempt:
                 errors.append(f"Open-Meteo answered on try {attempt + 1} of 3")
+            OM_VIA.update(via="this run (GitHub)",
+                          fetched_at=datetime.now(TZ).isoformat(timespec="seconds"))
             return data
     return None
 
@@ -1202,7 +1257,7 @@ def main():
     wu_summaries = get_wu_7day_summary()
     wu_7day = wu_7day_precip(wu_summaries)
     yesterday = wu_yesterday(wu_summaries, now_local)
-    om = get_open_meteo()
+    om = get_open_meteo(now_local)
     nws = get_nws_alerts()
 
     # Soil temperature: most recent non-null hourly reading + 7-day trend
@@ -1304,6 +1359,7 @@ def main():
         "data_integrity": {
             "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
             "errors_this_run": errors,
+            "open_meteo_via": OM_VIA,
         },
         "current_conditions": wu,
         "yesterday": yesterday,

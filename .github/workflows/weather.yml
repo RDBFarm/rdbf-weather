@@ -24,7 +24,22 @@ on:
     # the newer weather service fetch. If it fails, no big deal, but I still
     # like the idea of getting the forecast updated twice daily." Not one of
     # the Worker's 45 starts had failed.
-  workflow_dispatch: {}   # the Worker's two daily starts, and the Run workflow button
+  # The Worker's two daily starts, and the Run workflow button. Since
+  # 2026-11-16 the Worker asks Open-Meteo itself, from the farm's Cloudflare
+  # account, and passes the answer on (fetch_weather.py om_from_worker). Both
+  # inputs are optional: the button sends neither and the run asks directly.
+  workflow_dispatch:
+    inputs:
+      om:
+        description: "Open-Meteo answer from the Worker (gzip, base64). Leave blank."
+        required: false
+        default: ""
+        type: string
+      om_at:
+        description: "When the Worker fetched it (ISO time). Leave blank."
+        required: false
+        default: ""
+        type: string
 
 # Queue runs so they never overlap.
 concurrency:
@@ -59,6 +74,8 @@ jobs:
       - name: Run weather pre-processor
         env:
           WU_API_KEY: ${{ secrets.WU_API_KEY }}
+          OM_PAYLOAD: ${{ inputs.om }}
+          OM_AT: ${{ inputs.om_at }}
         run: python fetch_weather.py
 
       # Human-readable at-a-glance status on the run's Summary page, so you can
