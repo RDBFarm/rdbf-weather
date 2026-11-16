@@ -1,6 +1,6 @@
 {
   "schema_version": "1.1",
-  "generated_et": "2026-11-16T04:36:08-05:00",
+  "generated_et": "2026-11-16T16:35:58-05:00",
   "run_type": "manual",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
@@ -14,16 +14,16 @@
   },
   "current_conditions": {
     "source": "KMDPOOLE58",
-    "temp_f": 32,
-    "humidity_pct": 88,
-    "dew_point_f": 29,
+    "temp_f": 54,
+    "humidity_pct": 53,
+    "dew_point_f": 37,
     "dew_point_band": "dry",
     "dew_point_source": "station",
-    "wind_mph": 0,
-    "wind_dir_deg": 343,
+    "wind_mph": 4,
+    "wind_dir_deg": 308,
     "precip_today_in": 0.0,
     "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-11-16 04:36:03",
+    "obs_time_local": "2026-11-16 16:35:57",
     "dew_point_scale": {
       "units": "F",
       "source": "conventional dew-point comfort scale",
@@ -129,22 +129,22 @@
   },
   "nws_forecast": {
     "source": "api.weather.gov",
-    "period": "Overnight",
-    "short": "Partly Cloudy",
-    "detailed": "Partly cloudy, with a low around 37. Northwest wind around 6 mph.",
-    "temp_f": 37,
-    "is_daytime": false,
+    "period": "This Afternoon",
+    "short": "Sunny",
+    "detailed": "Sunny, with a high near 56. Northwest wind around 7 mph.",
+    "temp_f": 56,
+    "is_daytime": true,
     "next": {
-      "period": "Monday",
-      "short": "Sunny",
-      "detailed": "Sunny, with a high near 57. Northwest wind 5 to 10 mph.",
-      "temp_f": 57
+      "period": "Tonight",
+      "short": "Mostly Clear",
+      "detailed": "Mostly clear, with a low around 34. Northwest wind around 5 mph.",
+      "temp_f": 34
     }
   },
   "uv_index": {
     "source": "open-meteo (daily peak + crossings), currentuvindex.com (current)",
     "timezone": "America/New_York",
-    "current_uvi": 0,
+    "current_uvi": 0.3,
     "above_3_time_et": null,
     "below_3_time_et": null,
     "peak_uvi": null,
@@ -164,7 +164,7 @@
   },
   "hourly_ahead": {
     "source": "Open-Meteo",
-    "generated_et": "2026-11-16T04:36:08-05:00",
+    "generated_et": "2026-11-16T16:35:58-05:00",
     "note": "From the run time to the end of tomorrow. Filter to hours after the moment you are reading, not after generated_et.",
     "hours": []
   },
