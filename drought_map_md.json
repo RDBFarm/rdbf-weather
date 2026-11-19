@@ -1,8 +1,8 @@
 {
-  "map_date": "20261110",
-  "valid": "2026-11-10",
+  "map_date": "20261117",
+  "valid": "2026-11-17",
   "file": "drought_map_md.png",
-  "source_url": "https://droughtmonitor.unl.edu/data/png/20261110/20261110_MD_trd.png",
+  "source_url": "https://droughtmonitor.unl.edu/data/png/20261117/20261117_MD_trd.png",
   "credit": "U.S. Drought Monitor, a joint product of the National Drought Mitigation Center at UNL, USDA and NOAA",
-  "fetched_et": "2026-11-12T16:36:31-05:00"
+  "fetched_et": "2026-11-19T16:36:03-05:00"
 }
