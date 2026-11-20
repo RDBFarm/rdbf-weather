@@ -5,7 +5,8 @@ Red Devil Bison Farm — Ensemble Logger
 Saves what NOAA's GEFS ensemble (31 runs, 10 days) and ECMWF's ensemble (51
 runs, 15 days; since 2026-10-30), both through Open-Meteo, said about the
 farm each morning, so that their spread can be scored against what KMDPOOLE58
-recorded. Touring Weather Forecast (the trip
+recorded; and since 2026-11-20 the same for Dulles airport (KIAD), scored
+against its official daily report (station_obs.py). Touring Weather Forecast (the trip
 site) widens the GEFS temperature spread by measured multiples (1.9 within
 36 hours, 1.3 at 4 days) to draw its "likely range"; the data behind those
 multiples was not kept, and nobody archives a forecast as it was made a day
@@ -13,9 +14,9 @@ or a week ahead (forecast_log.py says why). This keeps it, so the multiples
 can be measured again properly, and so it can be asked whether the runs
 understate more on windy days than calm ones (the owner, 2026-10-29).
 
-One row per (log_date, model, target_date), appended to ensemble_log.csv:
+One row per (log_date, model, place, target_date), appended to ensemble_log.csv:
 
-    log_date, logged_et, model, run_init_et, target_date, lead_days,
+    log_date, logged_et, model, place, run_init_et, target_date, lead_days,
     high_mean_f, high_sd_f, low_mean_f, low_sd_f, members,
     site_high_f, site_high_spread_f, site_low_f, site_low_spread_f,
     wind_mean_mph, wind_spread_mph, gust_max_mph,
@@ -27,6 +28,12 @@ One row per (log_date, model, target_date), appended to ensemble_log.csv:
                             compare with the station's daily high and low.
   members                   how many runs gave a full day (all 24 hours)
   model                     ncep_gefs025 (NOAA) or ecmwf_ifs025 (ECMWF)
+  place                     farm (Poolesville; every row before 2026-11-20) or
+                            KIAD (Dulles airport). Added 2026-11-20 (the owner:
+                            "add Dulles to the log") after the farm's highs ran
+                            4-7°F above the forecast and its calm nights 5°F
+                            below: an official station separates the farm
+                            station's spot from the forecast's own error.
   site_high_f / _spread_f   what the trip site draws: the warmest hour of the
                             service's average of the runs, and its spread at
                             that hour (site_low_* the coolest)
@@ -52,7 +59,8 @@ Data-integrity rules (same as fetch_weather.py)
   - Nothing is estimated. A value the service did not give is left blank; a
     day with a missing hour gets no high or low rather than a partial one.
   - All dates and times are Eastern. lead_days = target_date - log_date.
-  - One row per (log_date, target_date); the first saved each day stands.
+  - One row per (log_date, model, place, target_date); the first saved each
+    day stands.
   - Hourly values: a run's daily high is its warmest hour, which can sit a
     little below the true peak a station records. Said here, not corrected.
 """
@@ -68,7 +76,13 @@ from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-LAT, LON = 39.151, -77.462  # Poolesville, MD (same as fetch_weather.py)
+# Where the ensembles are asked about: the farm (same point as
+# fetch_weather.py) and Dulles airport's station, at the position the NWS
+# gives for KIAD (api.weather.gov/stations/KIAD, 2026-11-20).
+PLACES = [
+    ("farm", 39.151, -77.462),      # Poolesville, MD
+    ("KIAD", 38.93472, -77.4475),   # Washington/Dulles International Airport
+]
 TZ = ZoneInfo("America/New_York")
 LOG_FILE = "ensemble_log.csv"
 USER_AGENT = "RDBF-ensemble-logger (github.com/rdbfarm)"
@@ -86,7 +100,7 @@ MODELS = [
 C_TO_F_SPREAD = 1.8             # the service gives spreads in °C even when °F is asked for (Trip-weather README)
 
 FIELDS = [
-    "log_date", "logged_et", "model", "run_init_et", "target_date", "lead_days",
+    "log_date", "logged_et", "model", "place", "run_init_et", "target_date", "lead_days",
     "high_mean_f", "high_sd_f", "low_mean_f", "low_sd_f", "members",
     "site_high_f", "site_high_spread_f", "site_low_f", "site_low_spread_f",
     "wind_mean_mph", "wind_spread_mph", "gust_max_mph",
@@ -113,9 +127,9 @@ def fetch_json(url, timeout=60):
         return None
 
 
-def ensemble_url(model, hourly, days):
+def ensemble_url(model, hourly, days, lat, lon):
     return "https://ensemble-api.open-meteo.com/v1/ensemble?" + urllib.parse.urlencode({
-        "latitude": LAT, "longitude": LON, "models": model, "hourly": hourly,
+        "latitude": lat, "longitude": lon, "models": model, "hourly": hourly,
         "temperature_unit": "fahrenheit", "wind_speed_unit": "mph",
         "timezone": "America/New_York", "forecast_days": days,
     })
@@ -143,7 +157,7 @@ def rnd(v, n=2):
     return "" if v is None else round(v, n)
 
 
-def build_rows(members_json, mean_json, run_init, now, model="ncep_gefs025"):
+def build_rows(members_json, mean_json, run_init, now, model="ncep_gefs025", place="farm"):
     """The day rows from the two responses. Pure: tested with made-up data."""
     mh = (members_json or {}).get("hourly") or {}
     times = mh.get("time") or []
@@ -185,7 +199,7 @@ def build_rows(members_json, mean_json, run_init, now, model="ncep_gefs025"):
         sd = lambda xs: statistics.pstdev(xs) if len(xs) > 1 else None
         row = {
             "log_date": now.date().isoformat(), "logged_et": now.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            "model": model, "run_init_et": run_init or "", "target_date": day, "lead_days": lead,
+            "model": model, "place": place, "run_init_et": run_init or "", "target_date": day, "lead_days": lead,
             "high_mean_f": rnd(statistics.mean(m["hi"]) if m["hi"] else None), "high_sd_f": rnd(sd(m["hi"])),
             "low_mean_f": rnd(statistics.mean(m["lo"]) if m["lo"] else None), "low_sd_f": rnd(sd(m["lo"])),
             "members": len(m["hi"]) or "",
@@ -223,8 +237,9 @@ def run_init_et(meta_name):
 
 # Rows written before a column existed: what that column is for them, when it
 # is a fact rather than a value (every row before "model" came from GEFS,
-# the only model logged then). Anything else is left blank.
-BEFORE = {"model": "ncep_gefs025"}
+# the only model logged then; every row before "place" is the farm's, the
+# only place logged then). Anything else is left blank.
+BEFORE = {"model": "ncep_gefs025", "place": "farm"}
 
 
 def widen(path):
@@ -249,7 +264,7 @@ def existing_keys(path):
     if path.exists():
         with open(path, newline="") as f:
             for r in csv.DictReader(f):
-                keys.add((r.get("log_date"), r.get("model") or BEFORE["model"], r.get("target_date")))
+                keys.add((r.get("log_date"), r.get("model") or BEFORE["model"], r.get("place") or BEFORE["place"], r.get("target_date")))
     return keys
 
 
@@ -262,12 +277,13 @@ def main():
     rows = []
     for model, meta_name, days in MODELS:
         run = run_init_et(meta_name)
-        members = fetch_json(ensemble_url(model, "temperature_2m,wind_speed_10m,wind_gusts_10m", days))
-        mean = fetch_json(ensemble_url(model + "_ensemble_mean",
-                                       "temperature_2m,temperature_2m_spread,wind_speed_10m,wind_speed_10m_spread,wind_gusts_10m", days))
-        new = [r for r in build_rows(members, mean, run, now, model) if (r["log_date"], model, r["target_date"]) not in keys]
-        rows.extend(new)
-        print(f"  {model:14s} run {run or 'unknown':22s} {len(new)} new rows" if new else f"  {model:14s} run {run or 'unknown':22s} no new rows")
+        for place, lat, lon in PLACES:
+            members = fetch_json(ensemble_url(model, "temperature_2m,wind_speed_10m,wind_gusts_10m", days, lat, lon))
+            mean = fetch_json(ensemble_url(model + "_ensemble_mean",
+                                           "temperature_2m,temperature_2m_spread,wind_speed_10m,wind_speed_10m_spread,wind_gusts_10m", days, lat, lon))
+            new = [r for r in build_rows(members, mean, run, now, model, place) if (r["log_date"], model, place, r["target_date"]) not in keys]
+            rows.extend(new)
+            print(f"  {model:14s} {place:5s} run {run or 'unknown':22s} " + (f"{len(new)} new rows" if new else "no new rows"))
     if rows:
         fresh = not path.exists() or path.stat().st_size == 0
         with open(path, "a", newline="") as f:
