@@ -1,27 +1,27 @@
 {
   "schema_version": "1.1",
-  "generated_et": "2026-11-21T04:36:11-05:00",
+  "generated_et": "2026-11-21T16:35:56-05:00",
   "run_type": "manual",
   "data_integrity": {
     "rules": "No estimated values. Missing data is null, never guessed. All times America/New_York.",
     "errors_this_run": [],
     "open_meteo_via": {
       "via": "rdbf-app Worker (Cloudflare)",
-      "fetched_at": "2026-11-21T04:35:53-05:00"
+      "fetched_at": "2026-11-21T16:35:40-05:00"
     }
   },
   "current_conditions": {
     "source": "KMDPOOLE58",
-    "temp_f": 39,
-    "humidity_pct": 93,
-    "dew_point_f": 37,
+    "temp_f": 59,
+    "humidity_pct": 59,
+    "dew_point_f": 45,
     "dew_point_band": "dry",
     "dew_point_source": "station",
-    "wind_mph": 2,
-    "wind_dir_deg": 350,
+    "wind_mph": 0,
+    "wind_dir_deg": 334,
     "precip_today_in": 0.0,
     "precip_rate_in_hr": 0.0,
-    "obs_time_local": "2026-11-21 04:36:06",
+    "obs_time_local": "2026-11-21 16:35:49",
     "dew_point_scale": {
       "units": "F",
       "source": "conventional dew-point comfort scale",
@@ -55,9 +55,9 @@
   },
   "soil_temperature": {
     "source": "Open-Meteo",
-    "surface_0cm_f": 24.3,
-    "depth_6cm_f": 37.7,
-    "reading_time_et": "2026-11-21 4:00 AM",
+    "surface_0cm_f": 55.3,
+    "depth_6cm_f": 51.7,
+    "reading_time_et": "2026-11-21 4:00 PM",
     "planting_threshold_f": 70,
     "threshold_reached_6cm": false,
     "trend_7day": "cooling"
@@ -229,47 +229,47 @@
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 1,
+        "precip_prob_pct": 2,
         "temp_max_f": 65.4,
-        "temp_min_f": 38.7,
-        "wind_max_mph": 8.6,
-        "wind_gust_max_mph": 13.9,
-        "wind_dir_deg": 59,
+        "temp_min_f": 39.7,
+        "wind_max_mph": 6.6,
+        "wind_gust_max_mph": 13.0,
+        "wind_dir_deg": 57,
         "wind_dir_compass": "ENE"
       },
       {
         "date": "2026-11-22",
         "weathercode": 63,
         "precip_type": "rain",
-        "precip_sum_mm": 17.92,
-        "precip_sum_in": 0.71,
-        "rain_sum_mm": 17.92,
-        "rain_sum_in": 0.71,
+        "precip_sum_mm": 7.6,
+        "precip_sum_in": 0.3,
+        "rain_sum_mm": 7.6,
+        "rain_sum_in": 0.3,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 69,
-        "temp_max_f": 62.7,
-        "temp_min_f": 49.6,
-        "wind_max_mph": 8.6,
-        "wind_gust_max_mph": 17.0,
-        "wind_dir_deg": 21,
-        "wind_dir_compass": "NNE"
+        "precip_prob_pct": 64,
+        "temp_max_f": 62.2,
+        "temp_min_f": 46.0,
+        "wind_max_mph": 6.9,
+        "wind_gust_max_mph": 14.3,
+        "wind_dir_deg": 8,
+        "wind_dir_compass": "N"
       },
       {
         "date": "2026-11-23",
-        "weathercode": 51,
-        "precip_type": "rain",
-        "precip_sum_mm": 0.2,
-        "precip_sum_in": 0.01,
-        "rain_sum_mm": 0.2,
-        "rain_sum_in": 0.01,
+        "weathercode": 45,
+        "precip_type": "fog_not_precip",
+        "precip_sum_mm": 0.0,
+        "precip_sum_in": 0.0,
+        "rain_sum_mm": 0.0,
+        "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 52,
-        "temp_max_f": 63.2,
-        "temp_min_f": 40.9,
-        "wind_max_mph": 14.1,
-        "wind_gust_max_mph": 24.2,
-        "wind_dir_deg": 316,
-        "wind_dir_compass": "NW"
+        "precip_prob_pct": 10,
+        "temp_max_f": 60.4,
+        "temp_min_f": 42.8,
+        "wind_max_mph": 14.3,
+        "wind_gust_max_mph": 25.3,
+        "wind_dir_deg": 303,
+        "wind_dir_compass": "WNW"
       },
       {
         "date": "2026-11-24",
@@ -281,12 +281,12 @@
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
         "precip_prob_pct": 0,
-        "temp_max_f": 50.7,
-        "temp_min_f": 30.8,
-        "wind_max_mph": 12.7,
-        "wind_gust_max_mph": 24.2,
-        "wind_dir_deg": 356,
-        "wind_dir_compass": "N"
+        "temp_max_f": 50.0,
+        "temp_min_f": 32.2,
+        "wind_max_mph": 11.4,
+        "wind_gust_max_mph": 26.2,
+        "wind_dir_deg": 348,
+        "wind_dir_compass": "NNW"
       },
       {
         "date": "2026-11-25",
@@ -297,46 +297,46 @@
         "rain_sum_mm": 0.0,
         "rain_sum_in": 0.0,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 21,
-        "temp_max_f": 47.8,
-        "temp_min_f": 25.2,
-        "wind_max_mph": 12.9,
-        "wind_gust_max_mph": 29.8,
-        "wind_dir_deg": 63,
+        "precip_prob_pct": 25,
+        "temp_max_f": 45.8,
+        "temp_min_f": 27.3,
+        "wind_max_mph": 11.2,
+        "wind_gust_max_mph": 22.8,
+        "wind_dir_deg": 59,
         "wind_dir_compass": "ENE"
       },
       {
         "date": "2026-11-26",
-        "weathercode": 61,
+        "weathercode": 63,
         "precip_type": "rain",
         "precip_sum_mm": 17.4,
         "precip_sum_in": 0.69,
-        "rain_sum_mm": 17.4,
-        "rain_sum_in": 0.69,
+        "rain_sum_mm": 17.1,
+        "rain_sum_in": 0.67,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 59,
-        "temp_max_f": 44.4,
-        "temp_min_f": 38.8,
-        "wind_max_mph": 18.1,
-        "wind_gust_max_mph": 41.4,
-        "wind_dir_deg": 26,
-        "wind_dir_compass": "NNE"
+        "precip_prob_pct": 70,
+        "temp_max_f": 60.4,
+        "temp_min_f": 39.7,
+        "wind_max_mph": 31.0,
+        "wind_gust_max_mph": 65.3,
+        "wind_dir_deg": 70,
+        "wind_dir_compass": "ENE"
       },
       {
         "date": "2026-11-27",
-        "weathercode": 53,
+        "weathercode": 51,
         "precip_type": "rain",
-        "precip_sum_mm": 3.6,
-        "precip_sum_in": 0.14,
-        "rain_sum_mm": 3.6,
-        "rain_sum_in": 0.14,
+        "precip_sum_mm": 1.5,
+        "precip_sum_in": 0.06,
+        "rain_sum_mm": 0.6,
+        "rain_sum_in": 0.02,
         "snowfall_sum_cm": 0.0,
-        "precip_prob_pct": 37,
-        "temp_max_f": 43.1,
-        "temp_min_f": 41.7,
-        "wind_max_mph": 18.3,
-        "wind_gust_max_mph": 36.5,
-        "wind_dir_deg": 279,
+        "precip_prob_pct": 40,
+        "temp_max_f": 60.1,
+        "temp_min_f": 43.0,
+        "wind_max_mph": 17.9,
+        "wind_gust_max_mph": 34.2,
+        "wind_dir_deg": 259,
         "wind_dir_compass": "W"
       }
     ]
@@ -349,44 +349,44 @@
         "date": "2026-11-21",
         "precip_type": "none",
         "precip_in": 0.0,
-        "precip_prob_pct": 1,
+        "precip_prob_pct": 2,
         "temp_max_f": 65.4,
-        "temp_min_f": 38.7,
-        "wind_max_mph": 8.6,
-        "wind_gust_max_mph": 13.9,
+        "temp_min_f": 39.7,
+        "wind_max_mph": 6.6,
+        "wind_gust_max_mph": 13.0,
         "frost": false,
         "freeze": false
       },
       {
         "date": "2026-11-22",
         "precip_type": "rain",
-        "precip_in": 0.71,
-        "precip_prob_pct": 69,
-        "temp_max_f": 62.7,
-        "temp_min_f": 49.6,
-        "wind_max_mph": 8.6,
-        "wind_gust_max_mph": 17.0,
+        "precip_in": 0.3,
+        "precip_prob_pct": 64,
+        "temp_max_f": 62.2,
+        "temp_min_f": 46.0,
+        "wind_max_mph": 6.9,
+        "wind_gust_max_mph": 14.3,
         "frost": false,
         "freeze": false
       },
       {
         "date": "2026-11-23",
-        "precip_type": "rain",
-        "precip_in": 0.01,
-        "precip_prob_pct": 52,
-        "temp_max_f": 63.2,
-        "temp_min_f": 40.9,
-        "wind_max_mph": 14.1,
-        "wind_gust_max_mph": 24.2,
+        "precip_type": "fog_not_precip",
+        "precip_in": 0.0,
+        "precip_prob_pct": 10,
+        "temp_max_f": 60.4,
+        "temp_min_f": 42.8,
+        "wind_max_mph": 14.3,
+        "wind_gust_max_mph": 25.3,
         "frost": false,
         "freeze": false
       }
     ],
-    "precip_total_in": 0.72,
+    "precip_total_in": 0.3,
     "any_frost": false,
     "any_freeze": false,
-    "max_wind_gust_mph": 24.2,
-    "narrative": "3-day outlook: 0.72 in rain expected, gusts to 24 mph."
+    "max_wind_gust_mph": 25.3,
+    "narrative": "3-day outlook: 0.30 in rain expected, gusts to 25 mph."
   },
   "wind_today": {
     "source": "Open-Meteo",
@@ -394,30 +394,30 @@
     "periods": [
       {
         "period": "morning",
-        "from_deg": 10,
+        "from_deg": 355,
         "from_compass": "N",
         "from_word": "north",
-        "avg_speed_mph": 4.6,
-        "max_gust_mph": 9.4
+        "avg_speed_mph": 4.1,
+        "max_gust_mph": 10.3
       },
       {
         "period": "afternoon",
-        "from_deg": 136,
+        "from_deg": 140,
         "from_compass": "SE",
         "from_word": "southeast",
-        "avg_speed_mph": 5.3,
-        "max_gust_mph": 11.0
+        "avg_speed_mph": 4.1,
+        "max_gust_mph": 10.1
       },
       {
         "period": "evening",
-        "from_deg": 98,
+        "from_deg": 97,
         "from_compass": "E",
         "from_word": "east",
         "avg_speed_mph": 6.2,
-        "max_gust_mph": 13.9
+        "max_gust_mph": 13.0
       }
     ],
-    "narrative": "Winds from the north around 5 mph this morning, shifting to the southeast around 5 mph in the afternoon, shifting to the east around 6 mph in the evening."
+    "narrative": "Winds from the north around 4 mph this morning, shifting to the southeast around 4 mph in the afternoon, shifting to the east around 6 mph in the evening."
   },
   "nws_alerts": {
     "source": "api.weather.gov",
@@ -428,309 +428,237 @@
   },
   "nws_forecast": {
     "source": "api.weather.gov",
-    "period": "Overnight",
-    "short": "Partly Cloudy",
-    "detailed": "Partly cloudy, with a low around 38. North wind around 2 mph.",
-    "temp_f": 38,
-    "is_daytime": false,
+    "period": "This Afternoon",
+    "short": "Mostly Cloudy",
+    "detailed": "Mostly cloudy, with a high near 62. Southeast wind around 3 mph.",
+    "temp_f": 62,
+    "is_daytime": true,
     "next": {
-      "period": "Saturday",
-      "short": "Partly Sunny",
-      "detailed": "Partly sunny, with a high near 64. East wind 1 to 5 mph.",
-      "temp_f": 64
+      "period": "Tonight",
+      "short": "Cloudy then Slight Chance Light Rain",
+      "detailed": "A slight chance of rain after 5am. Cloudy, with a low around 50. Northeast wind around 3 mph. Chance of precipitation is 20%.",
+      "temp_f": 50
     }
   },
   "uv_index": {
     "source": "open-meteo (daily peak + crossings), currentuvindex.com (current)",
     "timezone": "America/New_York",
-    "current_uvi": 0,
+    "current_uvi": 0.2,
     "above_3_time_et": null,
     "below_3_time_et": null,
-    "peak_uvi": 2.8,
-    "peak_time_et": "12:30 PM",
+    "peak_uvi": 2.75,
+    "peak_time_et": "12:18 PM",
     "peak_source": "open-meteo hourly uv_index",
     "sanity_check_passed": null,
     "tomorrow": {
       "date": "2026-11-22",
-      "peak_uvi": 1.9,
-      "peak_time_et": "1:44 PM",
-      "peak_time_iso": "2026-11-22T13:44-05:00",
+      "peak_uvi": 2.0,
+      "peak_time_et": "11:54 AM",
+      "peak_time_iso": "2026-11-22T11:54-05:00",
       "above_3_time_et": null,
       "below_3_time_et": null,
       "above_3_iso": null,
       "below_3_iso": null
     },
-    "peak_time_iso": "2026-11-21T12:30-05:00",
+    "peak_time_iso": "2026-11-21T12:18-05:00",
     "peak_time_precision": "vertex of a parabola through the peak hour and its neighbours; the VALUE is the sampled or daily maximum, only the TIME is interpolated"
   },
   "hourly_ahead": {
     "source": "Open-Meteo",
-    "generated_et": "2026-11-21T04:36:11-05:00",
+    "generated_et": "2026-11-21T16:35:56-05:00",
     "note": "From the run time to the end of tomorrow. Filter to hours after the moment you are reading, not after generated_et.",
     "hours": [
       {
-        "t": "2026-11-21T04:00-05:00",
-        "temp_f": 40.8,
-        "uv": 0.0,
-        "dew_f": 35.5
-      },
-      {
-        "t": "2026-11-21T05:00-05:00",
-        "temp_f": 39.9,
-        "uv": 0.0,
-        "dew_f": 36.1
-      },
-      {
-        "t": "2026-11-21T06:00-05:00",
-        "temp_f": 39.2,
-        "uv": 0.0,
-        "dew_f": 35.7
-      },
-      {
-        "t": "2026-11-21T07:00-05:00",
-        "temp_f": 38.8,
-        "uv": 0.0,
-        "dew_f": 34.9
-      },
-      {
-        "t": "2026-11-21T08:00-05:00",
-        "temp_f": 41.0,
-        "uv": 0.15,
-        "dew_f": 36.9
-      },
-      {
-        "t": "2026-11-21T09:00-05:00",
-        "temp_f": 47.9,
-        "uv": 0.85,
-        "dew_f": 38.9
-      },
-      {
-        "t": "2026-11-21T10:00-05:00",
-        "temp_f": 53.6,
-        "uv": 1.8,
-        "dew_f": 40.1
-      },
-      {
-        "t": "2026-11-21T11:00-05:00",
-        "temp_f": 58.6,
-        "uv": 2.55,
-        "dew_f": 40.5
-      },
-      {
-        "t": "2026-11-21T12:00-05:00",
-        "temp_f": 61.8,
-        "uv": 2.8,
-        "dew_f": 40.2
-      },
-      {
-        "t": "2026-11-21T13:00-05:00",
-        "temp_f": 63.7,
-        "uv": 2.8,
-        "dew_f": 38.9
-      },
-      {
-        "t": "2026-11-21T14:00-05:00",
-        "temp_f": 64.9,
-        "uv": 2.1,
-        "dew_f": 38.7
-      },
-      {
-        "t": "2026-11-21T15:00-05:00",
-        "temp_f": 65.2,
-        "uv": 1.65,
-        "dew_f": 36.1
-      },
-      {
         "t": "2026-11-21T16:00-05:00",
-        "temp_f": 62.5,
-        "uv": 0.65,
-        "dew_f": 35.9
+        "temp_f": 63.2,
+        "uv": 0.55,
+        "dew_f": 38.4
       },
       {
         "t": "2026-11-21T17:00-05:00",
-        "temp_f": 57.7,
+        "temp_f": 58.1,
         "uv": 0.1,
-        "dew_f": 34.7
+        "dew_f": 39.6
       },
       {
         "t": "2026-11-21T18:00-05:00",
-        "temp_f": 55.2,
+        "temp_f": 56.4,
         "uv": 0.0,
-        "dew_f": 34.8
+        "dew_f": 38.5
       },
       {
         "t": "2026-11-21T19:00-05:00",
-        "temp_f": 54.6,
+        "temp_f": 55.2,
         "uv": 0.0,
-        "dew_f": 33.7
+        "dew_f": 37.9
       },
       {
         "t": "2026-11-21T20:00-05:00",
-        "temp_f": 53.6,
+        "temp_f": 53.1,
         "uv": 0.0,
-        "dew_f": 33.9
+        "dew_f": 36.4
       },
       {
         "t": "2026-11-21T21:00-05:00",
         "temp_f": 52.4,
         "uv": 0.0,
-        "dew_f": 35.7
+        "dew_f": 36.2
       },
       {
         "t": "2026-11-21T22:00-05:00",
-        "temp_f": 52.3,
+        "temp_f": 51.8,
         "uv": 0.0,
-        "dew_f": 37.9
+        "dew_f": 41.2
       },
       {
         "t": "2026-11-21T23:00-05:00",
-        "temp_f": 50.7,
+        "temp_f": 50.5,
         "uv": 0.0,
-        "dew_f": 39.8
+        "dew_f": 42.8
       },
       {
         "t": "2026-11-22T00:00-05:00",
-        "temp_f": 50.0,
+        "temp_f": 48.9,
         "uv": 0.0,
-        "dew_f": 41.7
+        "dew_f": 43.0
       },
       {
         "t": "2026-11-22T01:00-05:00",
-        "temp_f": 49.8,
+        "temp_f": 48.0,
         "uv": 0.0,
-        "dew_f": 43.5
+        "dew_f": 43.1
       },
       {
         "t": "2026-11-22T02:00-05:00",
-        "temp_f": 50.2,
+        "temp_f": 47.8,
         "uv": 0.0,
-        "dew_f": 43.9
+        "dew_f": 43.8
       },
       {
         "t": "2026-11-22T03:00-05:00",
-        "temp_f": 49.7,
+        "temp_f": 46.8,
         "uv": 0.0,
-        "dew_f": 45.0
+        "dew_f": 43.7
       },
       {
         "t": "2026-11-22T04:00-05:00",
-        "temp_f": 49.8,
+        "temp_f": 46.3,
         "uv": 0.0,
-        "dew_f": 44.8
+        "dew_f": 44.1
       },
       {
         "t": "2026-11-22T05:00-05:00",
-        "temp_f": 50.6,
+        "temp_f": 46.2,
+        "uv": 0.0,
+        "dew_f": 43.4
+      },
+      {
+        "t": "2026-11-22T06:00-05:00",
+        "temp_f": 48.3,
+        "uv": 0.0,
+        "dew_f": 46.9
+      },
+      {
+        "t": "2026-11-22T07:00-05:00",
+        "temp_f": 48.4,
         "uv": 0.0,
         "dew_f": 46.5
       },
       {
-        "t": "2026-11-22T06:00-05:00",
-        "temp_f": 50.7,
-        "uv": 0.0,
-        "dew_f": 47.0
-      },
-      {
-        "t": "2026-11-22T07:00-05:00",
-        "temp_f": 50.7,
-        "uv": 0.0,
-        "dew_f": 48.8
-      },
-      {
         "t": "2026-11-22T08:00-05:00",
-        "temp_f": 52.1,
-        "uv": 0.15,
-        "dew_f": 50.7
+        "temp_f": 50.8,
+        "uv": 0.05,
+        "dew_f": 48.9
       },
       {
         "t": "2026-11-22T09:00-05:00",
-        "temp_f": 53.8,
-        "uv": 0.7,
-        "dew_f": 51.8
+        "temp_f": 52.8,
+        "uv": 0.35,
+        "dew_f": 50.6
       },
       {
         "t": "2026-11-22T10:00-05:00",
-        "temp_f": 56.8,
-        "uv": 0.9,
-        "dew_f": 54.2
+        "temp_f": 54.5,
+        "uv": 0.45,
+        "dew_f": 52.2
       },
       {
         "t": "2026-11-22T11:00-05:00",
-        "temp_f": 58.4,
-        "uv": 0.8,
-        "dew_f": 55.5
+        "temp_f": 56.6,
+        "uv": 1.0,
+        "dew_f": 53.4
       },
       {
         "t": "2026-11-22T12:00-05:00",
-        "temp_f": 60.0,
-        "uv": 1.15,
-        "dew_f": 56.4
+        "temp_f": 58.8,
+        "uv": 2.0,
+        "dew_f": 55.0
       },
       {
         "t": "2026-11-22T13:00-05:00",
-        "temp_f": 61.5,
-        "uv": 1.65,
-        "dew_f": 57.2
+        "temp_f": 59.8,
+        "uv": 0.5,
+        "dew_f": 55.3
       },
       {
         "t": "2026-11-22T14:00-05:00",
-        "temp_f": 62.5,
-        "uv": 1.9,
-        "dew_f": 57.6
-      },
-      {
-        "t": "2026-11-22T15:00-05:00",
-        "temp_f": 62.5,
-        "uv": 1.1,
-        "dew_f": 57.6
-      },
-      {
-        "t": "2026-11-22T16:00-05:00",
-        "temp_f": 60.7,
-        "uv": 0.6,
-        "dew_f": 56.8
-      },
-      {
-        "t": "2026-11-22T17:00-05:00",
-        "temp_f": 58.8,
-        "uv": 0.1,
-        "dew_f": 57.3
-      },
-      {
-        "t": "2026-11-22T18:00-05:00",
-        "temp_f": 57.7,
-        "uv": 0.0,
-        "dew_f": 56.8
-      },
-      {
-        "t": "2026-11-22T19:00-05:00",
-        "temp_f": 57.1,
-        "uv": 0.0,
-        "dew_f": 56.3
-      },
-      {
-        "t": "2026-11-22T20:00-05:00",
-        "temp_f": 56.6,
-        "uv": 0.0,
+        "temp_f": 61.4,
+        "uv": 0.3,
         "dew_f": 55.8
       },
       {
-        "t": "2026-11-22T21:00-05:00",
-        "temp_f": 56.2,
-        "uv": 0.0,
-        "dew_f": 55.4
+        "t": "2026-11-22T15:00-05:00",
+        "temp_f": 62.2,
+        "uv": 0.75,
+        "dew_f": 55.9
       },
       {
-        "t": "2026-11-22T22:00-05:00",
+        "t": "2026-11-22T16:00-05:00",
+        "temp_f": 61.1,
+        "uv": 0.6,
+        "dew_f": 55.6
+      },
+      {
+        "t": "2026-11-22T17:00-05:00",
+        "temp_f": 58.4,
+        "uv": 0.1,
+        "dew_f": 54.5
+      },
+      {
+        "t": "2026-11-22T18:00-05:00",
+        "temp_f": 57.2,
+        "uv": 0.0,
+        "dew_f": 54.6
+      },
+      {
+        "t": "2026-11-22T19:00-05:00",
+        "temp_f": 56.4,
+        "uv": 0.0,
+        "dew_f": 54.7
+      },
+      {
+        "t": "2026-11-22T20:00-05:00",
+        "temp_f": 56.1,
+        "uv": 0.0,
+        "dew_f": 54.9
+      },
+      {
+        "t": "2026-11-22T21:00-05:00",
         "temp_f": 56.1,
         "uv": 0.0,
         "dew_f": 55.2
       },
       {
-        "t": "2026-11-22T23:00-05:00",
-        "temp_f": 55.4,
+        "t": "2026-11-22T22:00-05:00",
+        "temp_f": 56.0,
         "uv": 0.0,
-        "dew_f": 54.0
+        "dew_f": 55.4
+      },
+      {
+        "t": "2026-11-22T23:00-05:00",
+        "temp_f": 55.6,
+        "uv": 0.0,
+        "dew_f": 55.0
       }
     ]
   },
