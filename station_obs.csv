@@ -1,2 +1,3 @@
 date,station,high_f,low_f,wind_avg_mph,wind_max_mph,gust_max_mph,nws_product,saved_et
 2026-11-20,KIAD,70.0,31.0,1.5,8.0,12.0,202611210725-KLWX-CDUS41-CLIIAD,2026-11-21T12:22:43-0500
+2026-11-21,KIAD,64.0,37.0,1.1,6.0,9.0,202611220723-KLWX-CDUS41-CLIIAD,2026-11-22T12:46:03-0500
