@@ -78,6 +78,14 @@ jobs:
           OM_AT: ${{ inputs.om_at }}
         run: python fetch_weather.py
 
+      # The farm station's 5-minute readings (station_readings.py says why).
+      # It never fails the run: a missing answer waits for the next one.
+      - name: Save the station's 5-minute readings
+        continue-on-error: true
+        env:
+          WU_API_KEY: ${{ secrets.WU_API_KEY }}
+        run: python station_readings.py
+
       # Human-readable at-a-glance status on the run's Summary page, so you can
       # see which sources returned data without opening the JSON.
       - name: Post run summary
@@ -148,6 +156,7 @@ jobs:
           # and no lost history.
           for attempt in 1 2 3 4 5; do
             git add weather_summary.json weather_history.csv
+            if [ -e station_readings.csv ]; then git add station_readings.csv; fi
             # The drought map only changes once a week, and does not exist at
             # all before the first successful fetch. Naming it in the git add
             # above would abort the step on an unmatched pathspec, so stage it
@@ -173,6 +182,7 @@ jobs:
             # Re-run the pre-processor against the remote's history so today's
             # row is merged into the up-to-date ledger, not an overwrite of it.
             python fetch_weather.py
+            python station_readings.py || true
             sleep 2
           done
 

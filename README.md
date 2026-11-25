@@ -54,6 +54,7 @@ a key, stored as a GitHub secret named `WU_API_KEY` — never in any file.
 | `forecast_log.py` | Saves each day's forecasts (Open-Meteo ECMWF and GFS; NWS) | You (upload) |
 | `ensemble_log.py` | Saves each morning's NOAA GEFS ensemble (31 runs, 10 days) and ECMWF ensemble (51 runs, 15 days; since 2026-10-30), for the farm and, since 2026-11-20, Dulles airport: the runs' daily highs and lows with their spread, the hourly average and spread the trip site draws, and wind, wind spread and gusts. For re-measuring the trip site's "likely range" multiples, and asking whether windy days need wider ones (since 2026-10-29) | You (upload) |
 | `station_obs.py` | Saves Dulles airport's (KIAD) official daily high, low and wind from the NWS daily climate report, to score the ensemble's Dulles rows against an official station beside the farm's own (since 2026-11-20) | You (upload) |
+| `station_readings.py` | Saves the farm station's own readings, about one every five minutes (temperature low, high and average in each, dew point, humidity, wind, rain), so "how long was it below freezing" is answered from the farm's station; run by the weather job (since 2026-11-25) | You (upload) |
 | `score_forecasts.py` | Scores saved forecasts against the station, by lead time | You (upload) |
 | `backtest_open_meteo.py` | Scores archived model forecasts (Open-Meteo Previous Runs) against the station | You (upload) |
 | `.github/workflows/forecast-log.yml` | Runs the logger and scorer twice a day | You (upload) |
@@ -61,6 +62,7 @@ a key, stored as a GitHub secret named `WU_API_KEY` — never in any file.
 | `forecast_log.csv` | Every forecast saved (append-only ledger) | The script |
 | `ensemble_log.csv` | Every ensemble forecast saved (append-only ledger, one row per day, model, place and target day; place `farm` or, since 2026-11-20, `KIAD`) | The script |
 | `station_obs.csv` | Dulles's official daily observations (append-only ledger, one row per day, with the NWS report's id) | The script |
+| `station_readings.csv` | The farm station's 5-minute readings (append-only ledger, one row per reading keyed by its UTC time; sort by time to read, as a morning run adds the previous evening) | The script |
 | `forecast_scores.csv` / `.md` | Live scorecard, rebuilt from the ledger each run | The script |
 | `backtest_log.csv`, `backtest_scores.csv` / `.md` | Backtest forecasts and their scorecard | The script |
 | `SETUP.md` | One-time setup steps | Reference |
