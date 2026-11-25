@@ -1,0 +1,60 @@
+name: Backfill station readings
+
+# Manual only. Fills the farm station's 5-minute readings for earlier days
+# from its history, one day per request, for days with fewer than 280 saved
+# (station_readings.py --from). Run once on 2026-11-25 for the season from
+# 1 September, so the hard-freeze tally counts nights the readings began after.
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: "First day to fill (YYYY-MM-DD)"
+        required: true
+        default: "2026-09-01"
+        type: string
+
+# Share the weather job's lock so this never writes beside a weather run.
+concurrency:
+  group: weather-writer
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  backfill-readings:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Fill the readings and rebuild the nights
+        env:
+          WU_API_KEY: ${{ secrets.WU_API_KEY }}
+          FROM: ${{ inputs.from }}
+        run: |
+          python station_readings.py --from "$FROM" | tee "$GITHUB_STEP_SUMMARY"
+          python station_nights.py | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit
+        run: |
+          git config user.name "rdbf-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add station_readings.csv station_nights.csv
+          if git diff --cached --quiet; then
+            echo "Nothing new."
+            exit 0
+          fi
+          git commit -m "Backfill station readings from $FROM"
+          for i in 1 2 3; do
+            if git push; then exit 0; fi
+            git pull --rebase origin main || exit 1
+          done
+          exit 1
+        env:
+          FROM: ${{ inputs.from }}

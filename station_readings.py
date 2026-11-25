@@ -45,6 +45,7 @@ import csv
 import json
 import os
 import sys
+import time
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -109,24 +110,54 @@ def build_rows(observations, endpoint, have):
     return rows
 
 
+def days_to_fill(start, today, have_et):
+    """Days from start to yesterday with fewer than 280 readings saved. Pure."""
+    count = {}
+    for t in have_et:
+        count[t[:10]] = count.get(t[:10], 0) + 1
+    out, d = [], start
+    while d < today:
+        if count.get(d.isoformat(), 0) < 280:
+            out.append(d)
+        d += timedelta(days=1)
+    return out
+
+
 def main():
     key = os.environ.get("WU_API_KEY", "").strip()
     now = datetime.now(TZ)
+    # --from YYYY-MM-DD fills earlier days from the station's history, one
+    # day per request (backfill-readings.yml; the season from 1 September was
+    # filled this way on 2026-11-25). Without it, a run asks for yesterday and
+    # today only.
+    since = None
+    if len(sys.argv) == 3 and sys.argv[1] == "--from":
+        since = datetime.strptime(sys.argv[2], "%Y-%m-%d").date()
     print(f"Station readings — {now.strftime('%Y-%m-%d %I:%M %p %Z')}")
     if not key:
         print("  note: WU_API_KEY not set; nothing asked")
         return 0
     path = Path(LOG_FILE)
-    have = set()
+    have, have_et = set(), []
     if path.exists():
         with open(path, newline="") as f:
-            have = {r["obs_time_utc"] for r in csv.DictReader(f)}
+            for r in csv.DictReader(f):
+                have.add(r["obs_time_utc"])
+                have_et.append(r["obs_time_et"])
     base = f"stationId={STATION_ID}&format=json&units=e&apiKey={key}"
-    yday = (now.date() - timedelta(days=1)).strftime("%Y%m%d")
-    asks = [("history/all " + yday, f"https://api.weather.com/v2/pws/history/all?{base}&date={yday}"),
-            ("observations/all/1day", f"https://api.weather.com/v2/pws/observations/all/1day?{base}")]
+    if since:
+        days = days_to_fill(since, now.date(), have_et)
+        asks = [("history/all " + d.strftime("%Y%m%d"),
+                 f"https://api.weather.com/v2/pws/history/all?{base}&date={d.strftime('%Y%m%d')}")
+                for d in days]
+    else:
+        yday = (now.date() - timedelta(days=1)).strftime("%Y%m%d")
+        asks = [("history/all " + yday, f"https://api.weather.com/v2/pws/history/all?{base}&date={yday}"),
+                ("observations/all/1day", f"https://api.weather.com/v2/pws/observations/all/1day?{base}")]
     rows = []
-    for name, url in asks:
+    for i, (name, url) in enumerate(asks):
+        if since and i:
+            time.sleep(3)     # the station's API allows 30 requests a minute
         d = fetch_json(url)
         got = build_rows((d or {}).get("observations"), name.split(" ")[0], have)
         print(f"  {name}: " + ("no answer" if d is None else

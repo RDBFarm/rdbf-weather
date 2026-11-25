@@ -84,7 +84,9 @@ jobs:
         continue-on-error: true
         env:
           WU_API_KEY: ${{ secrets.WU_API_KEY }}
-        run: python station_readings.py
+        run: |
+          python station_readings.py
+          python station_nights.py
 
       # Human-readable at-a-glance status on the run's Summary page, so you can
       # see which sources returned data without opening the JSON.
@@ -156,7 +158,9 @@ jobs:
           # and no lost history.
           for attempt in 1 2 3 4 5; do
             git add weather_summary.json weather_history.csv
-            if [ -e station_readings.csv ]; then git add station_readings.csv; fi
+            for f in station_readings.csv station_nights.csv; do
+              if [ -e "$f" ]; then git add "$f"; fi
+            done
             # The drought map only changes once a week, and does not exist at
             # all before the first successful fetch. Naming it in the git add
             # above would abort the step on an unmatched pathspec, so stage it
@@ -183,6 +187,7 @@ jobs:
             # row is merged into the up-to-date ledger, not an overwrite of it.
             python fetch_weather.py
             python station_readings.py || true
+            python station_nights.py || true
             sleep 2
           done
 
